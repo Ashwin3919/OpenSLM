@@ -98,9 +98,12 @@ def build_scaler(dtype: str) -> torch.amp.GradScaler:
     Returns:
         A ``GradScaler`` (enabled for float16, no-op otherwise).
     """
-    enabled = dtype == "float16"
-    logger.debug(f"GradScaler: enabled={enabled} (dtype={dtype})")
-    return torch.amp.GradScaler('cuda', enabled=enabled)
+    is_cuda = torch.cuda.is_available()
+    enabled = dtype == "float16" and is_cuda
+    device = "cuda" if is_cuda else "cpu"
+    
+    logger.debug(f"GradScaler: enabled={enabled} (dtype={dtype}, device={device})")
+    return torch.amp.GradScaler(device, enabled=enabled)
 
 
 def count_params(model: nn.Module) -> int:
