@@ -1,9 +1,10 @@
 # Technical Design: OpenSLM
 
+**Author**: Ashwin Shirke
+
 ## Overview
 
-OpenSLM is a production-grade, modular GPT-style Small Language Model (~50–60M
-parameters) trained from scratch on TinyStories.  It is a clean-room migration
+This is a code repo to experiment with different SLM architectures and test possible architectures of the SLM. It is a clean-room migration
 of a working Colab notebook into a system where:
 
 - **Swapping architecture** = change one config line

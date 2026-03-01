@@ -1,4 +1,4 @@
-# Training hyperparameters — matches the original Vizuara notebook exactly.
+# Training hyperparameters — matches the original notebook exactly.
 training:
   max_iters: 20000
   batch_size: 32

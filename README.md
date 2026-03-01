@@ -1,10 +1,8 @@
 # OpenSLM
 
-A production-grade, modular GPT-style Small Language Model (~50–60M parameters)
-trained from scratch on [TinyStories](https://huggingface.co/datasets/roneneldan/TinyStories).
+This is a code repo to experiment with different SLM architectures and test possible architectures of the SLM.
 
-Migrated from a monolithic Colab notebook into a clean, experiment-driven system
-where **swapping architecture = one config line, new experiment = new YAML file**.
+**Author**: Ashwin Shirke
 
 ---
 
@@ -113,4 +111,3 @@ training:
 ## Credits
 
 Architecture based on [nanoGPT](https://github.com/karpathy/nanoGPT) by Andrej Karpathy.
-Original notebook by Vizuara AI Labs.
