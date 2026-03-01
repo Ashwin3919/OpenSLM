@@ -84,7 +84,7 @@ def build_scheduler(
     return scheduler
 
 
-def build_scaler(dtype: str) -> torch.cuda.amp.GradScaler:
+def build_scaler(dtype: str) -> torch.amp.GradScaler:
     """Construct a ``GradScaler`` for mixed-precision training.
 
     The scaler is enabled only when ``dtype == "float16"`` because
@@ -100,7 +100,7 @@ def build_scaler(dtype: str) -> torch.cuda.amp.GradScaler:
     """
     enabled = dtype == "float16"
     logger.debug(f"GradScaler: enabled={enabled} (dtype={dtype})")
-    return torch.cuda.amp.GradScaler(enabled=enabled)
+    return torch.amp.GradScaler('cuda', enabled=enabled)
 
 
 def count_params(model: nn.Module) -> int:
