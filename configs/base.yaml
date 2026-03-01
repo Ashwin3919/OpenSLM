@@ -1,0 +1,12 @@
+project:
+  name: "slm"
+  seed: 42
+  output_dir: "outputs/"
+
+logging:
+  level: "INFO"
+  file: null
+
+device:
+  type: "auto"   # auto / cuda / mps / cpu
+  dtype: "auto"  # auto / float32 / float16 / bfloat16

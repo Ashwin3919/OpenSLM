@@ -1,0 +1,10 @@
+# Minimal model for CI, debugging, and architecture prototyping.
+# ~200K parameters — trains in seconds on CPU.
+model:
+  vocab_size: 50257
+  block_size: 16
+  n_layer: 2
+  n_head: 2
+  n_embd: 64
+  dropout: 0.0
+  bias: true

@@ -1,0 +1,10 @@
+# 6-layer / 6-head / 384-dim GPT — ~50-60M parameters
+# Matches the original Vizuara notebook exactly.
+model:
+  vocab_size: 50257   # GPT-2 tokenizer vocabulary
+  block_size: 128     # context window (tokens)
+  n_layer: 6
+  n_head: 6
+  n_embd: 384
+  dropout: 0.1
+  bias: true
