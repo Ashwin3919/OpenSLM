@@ -21,7 +21,6 @@ from src.models.config import (
     AppConfig,
     DataConfig,
     DeviceConfig,
-    GPTConfig,
     InferenceConfig,
     LoggingConfig,
     OptimizerConfig,
@@ -151,6 +150,10 @@ def load_config(path: str) -> AppConfig:
     Resolves ``_includes_`` directives recursively, deep-merges all included
     files, then converts the resulting dict to typed dataclasses.
 
+    The ``model:`` section is parsed using the config_class registered for the
+    ``model_type`` key (default ``"gpt"``), so new architectures only need to
+    register their config dataclass — no changes here.
+
     Args:
         path: Path to the top-level experiment YAML file.
 
@@ -160,8 +163,32 @@ def load_config(path: str) -> AppConfig:
     Raises:
         FileNotFoundError: If *path* or any included file does not exist.
         yaml.YAMLError: If any YAML file is malformed.
+        KeyError: If ``model_type`` names an unregistered architecture.
     """
+    # Trigger auto-discovery so all models/<name>/__init__.py files run and
+    # their register_model() calls are executed before we look up config_class.
+    try:
+        import importlib
+
+        importlib.import_module("models")
+    except ImportError:
+        pass
+
     raw = _resolve_includes(path)
+
+    # Parse the model section using the registered config_class so that
+    # _to_dataclass (which sees `model: Any`) gets a fully typed instance.
+    from src.core.registry import MODEL_REGISTRY
+
+    model_type = raw.get("model_type", "gpt")
+    model_cls = MODEL_REGISTRY.get(model_type)
+    if model_cls is None:
+        raise KeyError(
+            f"model_type '{model_type}' is not registered. "
+            f"Available: {list(MODEL_REGISTRY)}"
+        )
+    raw["model"] = model_cls.config_class(**raw.get("model", {}))
+
     return _to_dataclass(AppConfig, raw)
 
 
@@ -178,12 +205,12 @@ def validate_config(config: AppConfig) -> None:
         ValueError: If any field contains an invalid value.
     """
     mc = config.model
-    if mc.n_embd % mc.n_head != 0:
+    if hasattr(mc, "n_embd") and hasattr(mc, "n_head") and mc.n_embd % mc.n_head != 0:
         raise ValueError(
             f"model.n_embd ({mc.n_embd}) must be divisible by "
             f"model.n_head ({mc.n_head})"
         )
-    if not (0.0 <= mc.dropout <= 1.0):
+    if hasattr(mc, "dropout") and not (0.0 <= mc.dropout <= 1.0):
         raise ValueError(f"model.dropout must be in [0, 1], got {mc.dropout}")
 
     tc = config.training

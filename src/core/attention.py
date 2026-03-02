@@ -6,12 +6,11 @@ implementation otherwise — exactly matching the original notebook behaviour.
 """
 
 import math
+from typing import Any
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-from src.models.config import GPTConfig
 
 
 class CausalSelfAttention(nn.Module):
@@ -28,7 +27,7 @@ class CausalSelfAttention(nn.Module):
         AssertionError: If ``n_embd`` is not divisible by ``n_head``.
     """
 
-    def __init__(self, config: GPTConfig) -> None:
+    def __init__(self, config: Any) -> None:
         super().__init__()
         assert config.n_embd % config.n_head == 0, (
             f"n_embd ({config.n_embd}) must be divisible by n_head ({config.n_head})"

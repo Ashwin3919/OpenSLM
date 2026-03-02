@@ -14,12 +14,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from src.core.base import BaseSLM
 from src.core.blocks import TransformerBlock
 from src.core.layers import LayerNorm
-from src.models.config import GPTConfig
+from .config import GPTConfig
 
 
-class GPT(nn.Module):
+class GPT(BaseSLM):
     """GPT-style causal language model.
 
     Architecture:
@@ -32,6 +33,8 @@ class GPT(nn.Module):
     Args:
         config: ``GPTConfig`` defining the model dimensions.
     """
+
+    config_class = GPTConfig
 
     def __init__(self, config: GPTConfig) -> None:
         super().__init__()

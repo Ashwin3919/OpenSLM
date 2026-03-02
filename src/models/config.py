@@ -6,30 +6,7 @@ business logic — pure data containers validated at load time by
 """
 
 from dataclasses import dataclass, field
-from typing import Optional, Tuple
-
-
-@dataclass
-class GPTConfig:
-    """Model architecture parameters.
-
-    Attributes:
-        vocab_size: Vocabulary size (GPT-2 tokenizer = 50257).
-        block_size: Maximum context window length in tokens.
-        n_layer: Number of transformer blocks.
-        n_head: Number of attention heads per block.
-        n_embd: Embedding / hidden dimension. Must be divisible by n_head.
-        dropout: Dropout probability applied to embeddings, attention, and MLP.
-        bias: Whether to include bias terms in Linear and LayerNorm layers.
-    """
-
-    vocab_size: int = 50257
-    block_size: int = 128
-    n_layer: int = 6
-    n_head: int = 6
-    n_embd: int = 384
-    dropout: float = 0.1
-    bias: bool = True
+from typing import Any, Optional, Tuple
 
 
 @dataclass
@@ -185,12 +162,17 @@ class AppConfig:
 
     Loaded by ``src.infra.config.load_config`` from a YAML experiment file that
     uses ``_includes_`` to merge base / model / data / training configs.
+
+    ``model_type`` selects which registered SLM architecture to use.
+    ``model`` holds the corresponding architecture config dataclass (parsed
+    from the ``model:`` YAML section using the registry's ``config_class``).
     """
 
     project: ProjectConfig = field(default_factory=ProjectConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
     device: DeviceConfig = field(default_factory=DeviceConfig)
-    model: GPTConfig = field(default_factory=GPTConfig)
+    model_type: str = "gpt"
+    model: Any = None
     data: DataConfig = field(default_factory=DataConfig)
     training: TrainingConfig = field(default_factory=TrainingConfig)
     inference: InferenceConfig = field(default_factory=InferenceConfig)

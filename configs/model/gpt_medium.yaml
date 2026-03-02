@@ -1,5 +1,6 @@
 # Medium model — 12-layer / 12-head / 768-dim (~125M parameters).
 # Comparable to GPT-2 small.  Requires ~20GB GPU memory for training.
+model_type: gpt
 model:
   vocab_size: 50257
   block_size: 256

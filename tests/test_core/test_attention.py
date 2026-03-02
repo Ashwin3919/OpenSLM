@@ -15,7 +15,7 @@ def test_attention_output_shape(tiny_model_config):
 
 def test_attention_bad_n_head(tiny_model_config):
     """Should raise AssertionError when n_embd % n_head != 0."""
-    from src.models.config import GPTConfig
+    from models.gpt.config import GPTConfig
     bad_cfg = GPTConfig(
         vocab_size=100, block_size=16, n_layer=2,
         n_head=3, n_embd=64, dropout=0.0, bias=True,

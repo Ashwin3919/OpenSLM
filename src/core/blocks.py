@@ -9,12 +9,13 @@ Pre-LN places normalisation before each sub-layer rather than after,
 which empirically provides more stable training.
 """
 
+from typing import Any
+
 import torch
 import torch.nn as nn
 
 from src.core.attention import CausalSelfAttention
 from src.core.layers import LayerNorm, MLP
-from src.models.config import GPTConfig
 
 
 class TransformerBlock(nn.Module):
@@ -25,7 +26,7 @@ class TransformerBlock(nn.Module):
             ``MLP`` sub-modules.
     """
 
-    def __init__(self, config: GPTConfig) -> None:
+    def __init__(self, config: Any) -> None:
         super().__init__()
         self.ln1 = LayerNorm(config.n_embd, config.bias)
         self.attn = CausalSelfAttention(config)

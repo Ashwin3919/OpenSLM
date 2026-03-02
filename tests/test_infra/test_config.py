@@ -6,7 +6,8 @@ import pytest
 import yaml
 
 from src.infra.config import _deep_merge, load_config, validate_config
-from src.models.config import AppConfig, GPTConfig
+from models.gpt.config import GPTConfig
+from src.models.config import AppConfig
 
 
 # ── _deep_merge ──────────────────────────────────────────────────────────────

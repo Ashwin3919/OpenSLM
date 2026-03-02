@@ -3,7 +3,7 @@
 import torch
 import pytest
 
-from src.core.gpt import GPT
+from models.gpt.model import GPT
 from src.core.generation import generate
 
 

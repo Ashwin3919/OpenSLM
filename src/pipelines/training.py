@@ -20,7 +20,7 @@ from typing import List
 import torch
 from tqdm.auto import tqdm
 
-from src.core.gpt import GPT
+from src.core.registry import create_model
 from src.infra.config import validate_config
 from src.infra.device import get_device_context
 from src.infra.io import BatchLoader, load_checkpoint, save_checkpoint
@@ -81,7 +81,7 @@ class TrainingPipeline(BasePipeline):
         )
 
         # --- Model ---
-        self._model = GPT(self.config.model).to(self._device)
+        self._model = create_model(self.config.model_type, self.config.model).to(self._device)
         n_params = count_params(self._model)
         logger.info(f"Parameters: {n_params:,}  ({n_params / 1e6:.1f}M)")
 

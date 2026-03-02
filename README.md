@@ -1,64 +1,34 @@
 # OpenSLM
 
-This is a code repo to experiment with different SLM architectures and test possible architectures of the SLM.
+Experiment platform for small language models. Swap architectures with one config line, define new experiments with a YAML file, add new SLM implementations without touching pipeline code.
 
 **Author**: Ashwin Shirke
+
+---
+
+## Setup
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+```
 
 ---
 
 ## Quick Start
 
 ```bash
-pip install -e ".[dev]"
-
-# 1. Download and tokenise TinyStories (~10min first time)
+# 1. Tokenise TinyStories (~10 min, one-time)
 make prep
 
-# 2. Train with the baseline config
+# 2. Train the baseline GPT model
 make train
 
-# 3. Generate text from the best checkpoint
+# 3. Generate text from the saved checkpoint
 make generate
 ```
 
----
-
-## Project Structure
-
-```
-src/
-├── core/          # Pure model logic — LayerNorm, MLP, Attention, GPT, generate()
-├── models/        # Dataclass schemas — GPTConfig, TrainingConfig, AppConfig
-├── pipelines/     # Orchestration — DataPrep, Training, Evaluation, Inference
-├── infra/         # Filesystem, devices, logging — BatchLoader, checkpoints
-└── utils/         # Stateless helpers — build_optimizer, build_scheduler
-
-configs/
-├── base.yaml
-├── model/         # gpt_small, gpt_medium, gpt_tiny
-├── data/          # tinystories
-├── training/      # default, fast_debug
-└── experiments/   # exp_001_baseline, exp_002_bigger_model
-
-notebooks/         # Exploration only — all logic lives in src/
-tests/             # pytest — core, pipelines, infra
-```
-
----
-
-## Running Experiments
-
-```bash
-# Baseline (reproduces the original notebook)
-make train CFG=configs/experiments/exp_001_baseline.yaml
-
-# Bigger model
-make train CFG=configs/experiments/exp_002_bigger_model.yaml
-
-# Custom experiment: create a new YAML and run — zero code changes needed
-```
-
-Or directly:
+Or with explicit config targets:
 
 ```bash
 python main.py prep     --config configs/experiments/exp_001_baseline.yaml
@@ -70,41 +40,74 @@ python main.py generate --config configs/experiments/exp_001_baseline.yaml \
 
 ---
 
-## Running Tests
+## Project Structure
+
+```
+main.py                   ← CLI entry point (prep / train / evaluate / generate)
+
+models/                   ← SLM plugins (self-contained, one folder per model)
+  gpt/
+    config.py             ← GPTConfig dataclass
+    model.py              ← GPT class
+    __init__.py           ← registers "gpt" in the model registry
+  _template/              ← copy-paste scaffold for a new model
+
+src/
+  core/                   ← framework only (no model code)
+    base.py               ← BaseSLM ABC
+    registry.py           ← register_model decorator, create_model factory
+    attention.py          ← CausalSelfAttention
+    blocks.py             ← TransformerBlock
+    layers.py             ← LayerNorm, MLP
+    generation.py         ← autoregressive generate()
+  models/                 ← non-model config dataclasses (AppConfig, TrainingConfig, …)
+  pipelines/              ← orchestration (training, inference, data prep, evaluation)
+  infra/                  ← I/O: config loading, checkpoints, device setup, logging
+  utils/                  ← stateless helpers: optimizer, scheduler, scaler
+
+configs/
+  base.yaml               ← project / logging / device defaults
+  model/                  ← gpt_tiny, gpt_small, gpt_medium
+  data/                   ← tinystories
+  training/               ← default, fast_debug
+  experiments/            ← exp_001_baseline, exp_002_bigger_model
+
+tests/                    ← pytest (28 tests, CPU-only, no network)
+reports/                  ← design docs and model reference manuals
+  technical_design.md     ← codebase guide: how to add models, datasets, experiments
+  gpt.md                  ← GPT architecture reference and parameter guide
+notebooks/                ← exploration only; all logic lives in src/
+```
+
+---
+
+## Running Experiments
 
 ```bash
-make test        # all tests
-make test-core   # core model tests only (fast, no GPU, no network)
+make train CFG=configs/experiments/exp_001_baseline.yaml
+make train CFG=configs/experiments/exp_002_bigger_model.yaml
+```
+
+Create a new experiment by adding a YAML file — no code changes required. See `reports/technical_design.md` for the full workflow.
+
+---
+
+## Tests
+
+```bash
+make test        # full suite
+make test-core   # core only (fast, no GPU, no network)
 make lint        # ruff
 ```
 
 ---
 
-## Config System
+## Documentation
 
-Experiment YAML files use `_includes_` to compose base, model, data, and
-training configs.  Override only the values that change:
-
-```yaml
-# configs/experiments/my_experiment.yaml
-_includes_:
-  - "../base.yaml"
-  - "../data/tinystories.yaml"
-  - "../model/gpt_small.yaml"
-  - "../training/default.yaml"
-
-model:
-  n_layer: 8   # only this changes; everything else inherits
-```
-
----
-
-## Resuming Training
-
-```yaml
-training:
-  resume_from: "outputs/checkpoints/best_model.pt"
-```
+| File | Contents |
+|---|---|
+| `reports/technical_design.md` | Codebase architecture, adding models, changing datasets, running experiments |
+| `reports/gpt.md` | GPT architecture, all parameters, preset configs, results guide |
 
 ---
 

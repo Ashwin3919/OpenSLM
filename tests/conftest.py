@@ -10,11 +10,11 @@ import numpy as np
 import pytest
 import torch
 
+from models.gpt.config import GPTConfig
 from src.models.config import (
     AppConfig,
     DataConfig,
     DeviceConfig,
-    GPTConfig,
     LoggingConfig,
     OptimizerConfig,
     ProjectConfig,

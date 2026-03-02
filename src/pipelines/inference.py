@@ -11,7 +11,7 @@ import tiktoken
 import torch
 
 from src.core.generation import generate
-from src.core.gpt import GPT
+from src.core.registry import create_model
 from src.infra.device import get_device_context
 from src.infra.io import load_checkpoint
 from src.models.config import AppConfig
@@ -34,7 +34,7 @@ class InferencePipeline(BasePipeline):
         """Set up device context, tokeniser, and model skeleton."""
         self._device, _, _, _, _ = get_device_context(self.config.device)
         self._enc = tiktoken.get_encoding(self.config.data.encoding)
-        self._model = GPT(self.config.model).to(self._device)
+        self._model = create_model(self.config.model_type, self.config.model).to(self._device)
         self._output: str = ""
 
     def validate(self) -> None:

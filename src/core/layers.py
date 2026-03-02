@@ -5,11 +5,11 @@ They accept a ``config`` object so they can be composed into blocks
 without knowing about the broader system.
 """
 
+from typing import Any
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-from src.models.config import GPTConfig
 
 
 class LayerNorm(nn.Module):
@@ -52,7 +52,7 @@ class MLP(nn.Module):
         config: ``GPTConfig`` providing ``n_embd``, ``bias``, and ``dropout``.
     """
 
-    def __init__(self, config: GPTConfig) -> None:
+    def __init__(self, config: Any) -> None:
         super().__init__()
         self.c_fc = nn.Linear(config.n_embd, 4 * config.n_embd, bias=config.bias)
         self.gelu = nn.GELU()

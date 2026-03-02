@@ -1,5 +1,6 @@
 # Minimal model for CI, debugging, and architecture prototyping.
 # ~200K parameters — trains in seconds on CPU.
+model_type: gpt
 model:
   vocab_size: 50257
   block_size: 16
