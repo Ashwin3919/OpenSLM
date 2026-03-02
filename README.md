@@ -45,14 +45,14 @@ python main.py generate --config configs/experiments/exp_001_baseline.yaml \
 ```
 main.py                   ← CLI entry point (prep / train / evaluate / generate)
 
-models/                   ← SLM plugins (self-contained, one folder per model)
-  gpt/
-    config.py             ← GPTConfig dataclass
-    model.py              ← GPT class
-    __init__.py           ← registers "gpt" in the model registry
-  _template/              ← copy-paste scaffold for a new model
-
 src/
+  models/                 ← SLM plugins and non-model config dataclasses
+    gpt/
+      config.py           ← GPTConfig dataclass
+      model.py            ← GPT class
+      __init__.py         ← registers "gpt" in the model registry
+    _template/            ← copy-paste scaffold for a new model
+    __init__.py           ← auto-discovery, exports config dataclasses (AppConfig, etc.)
   core/                   ← framework only (no model code)
     base.py               ← BaseSLM ABC
     registry.py           ← register_model decorator, create_model factory
@@ -60,7 +60,6 @@ src/
     blocks.py             ← TransformerBlock
     layers.py             ← LayerNorm, MLP
     generation.py         ← autoregressive generate()
-  models/                 ← non-model config dataclasses (AppConfig, TrainingConfig, …)
   pipelines/              ← orchestration (training, inference, data prep, evaluation)
   infra/                  ← I/O: config loading, checkpoints, device setup, logging
   utils/                  ← stateless helpers: optimizer, scheduler, scaler

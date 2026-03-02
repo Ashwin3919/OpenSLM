@@ -15,12 +15,12 @@ main.py
         ├── src/infra/         I/O: YAML loading, checkpoints, device setup, logging
         └── src/utils/         stateless math helpers: optimizer, scheduler, scaler
 
-models/                        SLM plugins — one self-contained folder per architecture
-src/models/                    config dataclasses for everything except model internals
+src/models/                    SLM plugins (one folder per architecture) and config dataclasses
+src/models/                    SLM plugins (one folder per architecture) and config dataclasses
 configs/                       YAML files composed per experiment
 ```
 
-**Rule**: `src/core/` contains zero model-specific code. Every SLM lives entirely inside `models/<name>/`.
+**Rule**: `src/core/` contains zero model-specific code. Every SLM lives entirely inside `src/models/<name>/`.
 
 ---
 
@@ -52,7 +52,7 @@ _includes_:
 | `project` | `ProjectConfig` | `src/models/config.py` |
 | `logging` | `LoggingConfig` | `src/models/config.py` |
 | `device` | `DeviceConfig` | `src/models/config.py` |
-| `model_type` + `model` | model-specific (e.g. `GPTConfig`) | `models/<name>/config.py` |
+| `model_type` + `model` | model-specific (e.g. `GPTConfig`) | `src/models/<name>/config.py` |
 | `data` | `DataConfig` | `src/models/config.py` |
 | `training` | `TrainingConfig` | `src/models/config.py` |
 | `inference` | `InferenceConfig` | `src/models/config.py` |
@@ -76,11 +76,11 @@ Every SLM is registered under a string key. Pipelines instantiate models by key 
 # src/core/registry.py
 MODEL_REGISTRY: dict[str, Type] = {}
 
-register_model("gpt")(GPT)   # done once in models/gpt/__init__.py
+register_model("gpt")(GPT)   # done once in src/models/gpt/__init__.py
 create_model("gpt", config)  # used in pipelines
 ```
 
-Auto-discovery: when `load_config` or `create_model` are called, `importlib.import_module("models")` runs, which executes every `models/<name>/__init__.py` and triggers their `register_model` calls. Nothing else needs to happen.
+Auto-discovery: when `load_config` or `create_model` are called, `importlib.import_module("src.models")` runs, which executes every `src/models/<name>/__init__.py` and triggers their `register_model` calls. Nothing else needs to happen.
 
 ---
 
@@ -91,12 +91,12 @@ Full walkthrough — no other files need to change.
 ### Step 1 — copy the template
 
 ```bash
-cp -r models/_template models/llama
+cp -r src/models/_template src/models/llama
 ```
 
 ### Step 2 — define the config dataclass
 
-Edit `models/llama/config.py`:
+Edit `src/models/llama/config.py`:
 
 ```python
 from dataclasses import dataclass
@@ -114,7 +114,7 @@ class LlamaConfig:
 
 ### Step 3 — implement the model
 
-Edit `models/llama/model.py`. The only contract:
+Edit `src/models/llama/model.py`. The only contract:
 
 ```python
 from src.core.base import BaseSLM
@@ -136,7 +136,7 @@ You get `generate()` for free from `BaseSLM`. Override it only for custom sampli
 
 ### Step 4 — register
 
-Edit `models/llama/__init__.py`:
+Edit `src/models/llama/__init__.py`:
 
 ```python
 from src.core.registry import register_model

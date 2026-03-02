@@ -1,6 +1,6 @@
 # GPT — Architecture Reference
 
-This document covers the GPT model implementation in `models/gpt/`. It is a reference for understanding the architecture, configuring it, and interpreting training results.
+This document covers the GPT model implementation in `src/models/gpt/`. It is a reference for understanding the architecture, configuring it, and interpreting training results.
 
 For adding a new model or changing datasets, see `reports/technical_design.md`.
 
@@ -56,7 +56,7 @@ LayerNorm is applied *before* attention and MLP (pre-LN), not after (post-LN). P
 
 ## Parameters
 
-### `GPTConfig` — `models/gpt/config.py`
+### `GPTConfig` — `src/models/gpt/config.py`
 
 | Field | Type | Default | Description |
 |---|---|---|---|
@@ -257,9 +257,9 @@ Key generation parameters (in `InferenceConfig`):
 
 | Purpose | File |
 |---|---|
-| Config dataclass | `models/gpt/config.py` |
-| Model implementation | `models/gpt/model.py` |
-| Plugin registration | `models/gpt/__init__.py` |
+| Config dataclass | `src/models/gpt/config.py` |
+| Model implementation | `src/models/gpt/model.py` |
+| Plugin registration | `src/models/gpt/__init__.py` |
 | Preset configs | `configs/model/gpt_tiny.yaml`, `gpt_small.yaml`, `gpt_medium.yaml` |
 | Framework primitives used | `src/core/attention.py`, `src/core/blocks.py`, `src/core/layers.py` |
 | Generation loop | `src/core/generation.py` |

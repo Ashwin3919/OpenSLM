@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-import models  # noqa: F401 — triggers auto-discovery of all model plugins
+import src.models  # noqa: F401 — triggers auto-discovery of all model plugins
 
 from src.infra.config import load_config
 from src.pipelines.data_prep import DataPrepPipeline
