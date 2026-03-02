@@ -41,6 +41,10 @@ class BatchLoader:
         device: str,
         device_type: str,
     ) -> None:
+        if block_size <= 0:
+            raise ValueError(f"block_size must be > 0, got {block_size}")
+        if batch_size <= 0:
+            raise ValueError(f"batch_size must be > 0, got {batch_size}")
         self._paths: Dict[str, str] = {
             "train": train_path,
             "validation": validation_path,
@@ -70,6 +74,11 @@ class BatchLoader:
 
         # Re-create memmap each call to prevent memory leak
         data = np.memmap(self._paths[split], dtype=np.uint16, mode="r")
+        if len(data) <= self.block_size:
+            raise ValueError(
+                f"Data file '{self._paths[split]}' has {len(data)} tokens, "
+                f"but block_size is {self.block_size}. Need at least block_size + 1 tokens."
+            )
 
         ix = torch.randint(len(data) - self.block_size, (self.batch_size,))
         x = torch.stack(
@@ -183,7 +192,11 @@ def load_checkpoint(
         A dict with keys ``"iteration"``, ``"val_loss"``, and ``"config"``
         from the checkpoint (whichever are present).
     """
-    ckpt = torch.load(path, map_location=device)
+    if not Path(path).exists():
+        raise FileNotFoundError(f"Checkpoint not found: {path}")
+    ckpt = torch.load(path, map_location=device, weights_only=True)
+    if "model" not in ckpt:
+        raise KeyError(f"Checkpoint at '{path}' is missing required key 'model'")
     model.load_state_dict(ckpt["model"])
 
     if optimizer is not None and "optimizer" in ckpt:

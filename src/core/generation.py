@@ -11,12 +11,12 @@ import torch
 import torch.nn.functional as F
 
 if TYPE_CHECKING:
-    from src.core.gpt import GPT
+    from src.core.base import BaseSLM
 
 
 @torch.no_grad()
 def generate(
-    model: "GPT",
+    model: "BaseSLM",
     idx: torch.Tensor,
     max_new_tokens: int,
     temperature: float = 1.0,
@@ -31,7 +31,7 @@ def generate(
     optional top-k filtering, then multinomial sampling.
 
     Args:
-        model: A ``GPT`` model instance (can be on any device).
+        model: Any ``BaseSLM`` instance (can be on any device).
         idx: Conditioning token indices of shape ``(B, T)``.
         max_new_tokens: Number of new tokens to append.
         temperature: Sampling temperature.  1.0 leaves logits unchanged;

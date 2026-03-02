@@ -110,3 +110,30 @@ def test_validate_warmup_too_large():
     config.training.scheduler.warmup_steps = 200
     with pytest.raises(ValueError, match="warmup_steps"):
         validate_config(config)
+
+
+def test_validate_bad_dropout():
+    """dropout outside [0, 1] should raise ValueError."""
+    config = AppConfig()
+    config.model = GPTConfig(
+        vocab_size=100, block_size=16, n_layer=2,
+        n_head=2, n_embd=64, dropout=1.5, bias=True,
+    )
+    with pytest.raises(ValueError, match="dropout"):
+        validate_config(config)
+
+
+def test_validate_bad_batch_size():
+    """batch_size <= 0 should raise ValueError."""
+    config = AppConfig()
+    config.training.batch_size = -1
+    with pytest.raises(ValueError, match="batch_size"):
+        validate_config(config)
+
+
+def test_validate_bad_gradient_accumulation_steps():
+    """gradient_accumulation_steps <= 0 should raise ValueError."""
+    config = AppConfig()
+    config.training.gradient_accumulation_steps = 0
+    with pytest.raises(ValueError, match="gradient_accumulation_steps"):
+        validate_config(config)

@@ -202,6 +202,11 @@ class TrainingPipeline(BasePipeline):
             json.dump(metrics, fh, indent=2)
         logger.info(f"Metrics saved → {self._metrics_path}")
 
+    @property
+    def best_val_loss(self) -> float:
+        """Best validation loss recorded so far (``inf`` before first evaluation)."""
+        return self._best_val_loss
+
     def _save_best_checkpoint(self, iteration: int, val_loss: float) -> None:
         """Save a checkpoint when a new best validation loss is achieved.
 

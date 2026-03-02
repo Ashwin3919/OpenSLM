@@ -87,7 +87,7 @@ class TuningPipeline(BasePipeline):
         try:
             trainer.execute()
             # 4. Return the best validation loss achieved by this trial
-            val_loss = trainer._best_val_loss
+            val_loss = trainer.best_val_loss
             logger.info(f"--- Finished Trial {trial.number} (val_loss: {val_loss:.4f}) ---")
             return val_loss
         except Exception as e:

@@ -48,3 +48,19 @@ def test_attention_shorter_sequence(tiny_model_config):
     T = tiny_model_config.block_size // 2
     x = torch.randn(1, T, tiny_model_config.n_embd)
     assert attn(x).shape == (1, T, tiny_model_config.n_embd)
+
+
+def test_attention_rejects_2d_input(tiny_model_config):
+    """2-D input must raise ValueError — forward expects (B, T, C)."""
+    attn = CausalSelfAttention(tiny_model_config)
+    x_2d = torch.randn(4, tiny_model_config.n_embd)
+    with pytest.raises(ValueError, match="3-D"):
+        attn(x_2d)
+
+
+def test_attention_rejects_wrong_embedding_dim(tiny_model_config):
+    """Embedding dim != n_embd must raise ValueError."""
+    attn = CausalSelfAttention(tiny_model_config)
+    x = torch.randn(1, 8, tiny_model_config.n_embd + 1)
+    with pytest.raises(ValueError, match="n_embd"):
+        attn(x)

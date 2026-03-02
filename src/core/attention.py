@@ -60,7 +60,15 @@ class CausalSelfAttention(nn.Module):
         Returns:
             Output tensor of shape ``(B, T, C)``.
         """
+        if x.dim() != 3:
+            raise ValueError(
+                f"Expected 3-D input (B, T, C), got {x.dim()}-D tensor with shape {tuple(x.shape)}"
+            )
         B, T, C = x.size()
+        if C != self.n_embd:
+            raise ValueError(
+                f"Input embedding dim {C} does not match n_embd {self.n_embd}"
+            )
         head_size = C // self.n_head
 
         # Project to Q, K, V and reshape to (B, n_head, T, head_size)
