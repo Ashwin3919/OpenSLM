@@ -32,6 +32,7 @@ Or with explicit config targets:
 
 ```bash
 python main.py prep     --config configs/experiments/exp_001_baseline.yaml
+python main.py tune     --config configs/experiments/exp_001_baseline.yaml
 python main.py train    --config configs/experiments/exp_001_baseline.yaml
 python main.py evaluate --config configs/experiments/exp_001_baseline.yaml
 python main.py generate --config configs/experiments/exp_001_baseline.yaml \

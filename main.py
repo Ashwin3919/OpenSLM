@@ -8,10 +8,12 @@ from src.pipelines.data_prep import DataPrepPipeline
 from src.pipelines.evaluation import EvaluationPipeline
 from src.pipelines.inference import InferencePipeline
 from src.pipelines.training import TrainingPipeline
+from src.pipelines.tuning import TuningPipeline
 
 _PIPELINES = {
     "prep": DataPrepPipeline, "train": TrainingPipeline,
     "evaluate": EvaluationPipeline, "generate": InferencePipeline,
+    "tune": TuningPipeline,
 }
 
 if __name__ == "__main__":
