@@ -10,7 +10,7 @@ The project is split into four independent layers. Dependencies only flow downwa
 
 ```
 main.py
-  └── src/pipelines/          orchestration (training loop, eval loop, data prep, inference)
+  └── src/pipelines/          orchestration (training, tuning, eval, data prep, inference)
         ├── src/core/          framework: model primitives, registry, generation
         ├── src/infra/         I/O: YAML loading, checkpoints, device setup, logging
         └── src/utils/         stateless math helpers: optimizer, scheduler, scaler
@@ -236,6 +236,7 @@ The binary format is `uint16` token IDs written with `np.memmap` — one flat ar
 
 ```bash
 python main.py prep     --config <experiment.yaml>   # tokenise + write .bin files
+python main.py tune     --config <experiment.yaml>   # find best hyperparameters using Optuna (saves to outputs/best_config.yaml)
 python main.py train    --config <experiment.yaml>   # train; checkpoints → outputs/checkpoints/
 python main.py evaluate --config <experiment.yaml>   # eval loss on validation set
 python main.py generate --config <experiment.yaml> --prompt "Once upon a time"

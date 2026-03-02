@@ -44,7 +44,8 @@ python main.py generate --config configs/experiments/exp_001_baseline.yaml \
 ## Project Structure
 
 ```
-main.py                   ← CLI entry point (prep / train / evaluate / generate)
+main.py                   ← CLI entry point (prep / tune / train / evaluate / generate)
+
 
 src/
   models/                 ← SLM plugins and non-model config dataclasses
