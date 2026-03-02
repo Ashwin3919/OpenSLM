@@ -5,23 +5,23 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "openslm"
 version = "0.1.0"
-description = "Production-grade GPT-style SLM trained on TinyStories"
-requires-python = ">=3.10"
+description = "Experiment platform for small language model architectures"
+requires-python = ">=3.11"
 dependencies = [
-    "torch>=2.1.0",
-    "tiktoken>=0.5.0",
-    "datasets>=2.14.0",
-    "numpy>=1.24.0",
-    "tqdm>=4.65.0",
+    "torch>=2.4.0",
+    "tiktoken>=0.7.0",
+    "datasets>=3.0.0",
+    "numpy>=2.0.0",
+    "tqdm>=4.66.0",
     "pyyaml>=6.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.4.0",
-    "pytest-cov>=4.1.0",
-    "ruff>=0.1.0",
-    "mypy>=1.5.0",
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.4.0",
+    "mypy>=1.10.0",
 ]
 notebooks = [
     "jupyter>=1.0.0",
@@ -31,7 +31,7 @@ notebooks = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src*"]
+include = ["src*", "models*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -39,11 +39,11 @@ pythonpath = ["."]
 
 [tool.ruff]
 line-length = 100
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W"]
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.11"
 ignore_missing_imports = true
