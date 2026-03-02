@@ -2,7 +2,7 @@
 
 Usage::
 
-    # Register a model (done once, usually in models/<name>/__init__.py):
+    # Register a model (done once, usually in src/models/<name>/__init__.py):
     from src.core.registry import register_model
 
     @register_model("my_model")
@@ -66,7 +66,7 @@ def create_model(model_type: str, model_config) -> "BaseSLM":
     """
     if model_type not in MODEL_REGISTRY:
         # Lazy auto-discovery: import the top-level models package so that
-        # every models/<name>/__init__.py is executed and calls register_model.
+        # every src/models/<name>/__init__.py is executed and calls register_model.
         try:
             import importlib
 

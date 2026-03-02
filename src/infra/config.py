@@ -165,7 +165,7 @@ def load_config(path: str) -> AppConfig:
         yaml.YAMLError: If any YAML file is malformed.
         KeyError: If ``model_type`` names an unregistered architecture.
     """
-    # Trigger auto-discovery so all models/<name>/__init__.py files run and
+    # Trigger auto-discovery so all src/models/<name>/__init__.py files run and
     # their register_model() calls are executed before we look up config_class.
     try:
         import importlib

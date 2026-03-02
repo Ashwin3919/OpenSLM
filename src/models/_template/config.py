@@ -1,6 +1,6 @@
 """Hyperparameter dataclass for MyModel.
 
-Copy this file to models/<your_name>/config.py and add the fields your
+Copy this file to src/models/<your_name>/config.py and add the fields your
 architecture needs.  Keep all fields typed and default-valued so the config
 system can parse them from YAML without extra code.
 """
