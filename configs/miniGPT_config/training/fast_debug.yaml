@@ -1,6 +1,6 @@
 # Fast debug training config — 10 iterations, tiny batch.
 # Use with gpt_tiny model for CI smoke tests and rapid iteration.
-# Run: make train CFG=configs/experiments/exp_debug.yaml
+# Run: make train MODEL=miniGPT_config
 training:
   max_iters: 10
   batch_size: 2
@@ -9,7 +9,7 @@ training:
   max_grad_norm: 1.0
   eval_interval: 100    # no eval during 10 iters
   eval_batches: 2
-  checkpoint_path: "outputs/debug/checkpoints/"
+  checkpoint_path: "outputs/miniGPT/debug/checkpoints/"
   resume_from: null
 
   optimizer:

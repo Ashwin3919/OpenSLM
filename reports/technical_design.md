@@ -31,7 +31,7 @@ configs/                       YAML files composed per experiment
 Experiment YAML files use `_includes_` to compose config fragments. Merging is deep (nested dicts merge key-by-key); later keys override earlier ones.
 
 ```yaml
-# configs/experiments/exp_001_baseline.yaml
+# configs/miniGPT_config/experiments/exp_001_baseline.yaml
 _includes_:
   - "../base.yaml"
   - "../data/tinystories.yaml"
@@ -88,7 +88,7 @@ Auto-discovery: when `load_config` or `create_model` are called, `importlib.impo
 
 Full walkthrough — no other files need to change.
 
-### Step 1 — copy the template
+### Step 1 — copy the src template
 
 ```bash
 cp -r src/models/_template src/models/llama
@@ -145,10 +145,23 @@ from .model import Llama
 register_model("llama")(Llama)
 ```
 
-### Step 5 — create a config preset
+### Step 5 — copy the config template
+
+```bash
+cp -r configs/config_template configs/llama_config
+```
+
+Then replace all `<<MODEL_NAME>>` placeholders with `llama` in:
+- `configs/llama_config/base.yaml`
+- `configs/llama_config/training/default.yaml`
+- `configs/llama_config/training/fast_debug.yaml`
+
+Do the same for `<<MODEL_CONFIG>>` in `scripts/template_scripts/` (copy to `scripts/llama_scripts/`).
+
+### Step 6 — create a model preset
 
 ```yaml
-# configs/model/llama_small.yaml
+# configs/llama_config/model/llama_small.yaml
 model_type: llama
 model:
   vocab_size: 32000
@@ -160,10 +173,10 @@ model:
   bias: false
 ```
 
-### Step 6 — create an experiment
+### Step 7 — create an experiment
 
 ```yaml
-# configs/experiments/exp_003_llama.yaml
+# configs/llama_config/experiments/exp_001_baseline.yaml
 _includes_:
   - "../base.yaml"
   - "../data/tinystories.yaml"
@@ -171,10 +184,10 @@ _includes_:
   - "../training/default.yaml"
 ```
 
-### Step 7 — run
+### Step 8 — run
 
 ```bash
-python main.py train --config configs/experiments/exp_003_llama.yaml
+make train MODEL=llama_config
 ```
 
 ---
@@ -183,10 +196,10 @@ python main.py train --config configs/experiments/exp_003_llama.yaml
 
 ### Use a different HuggingFace dataset
 
-Create a new data config:
+Create a new data config inside the model's config folder:
 
 ```yaml
-# configs/data/openwebtext.yaml
+# configs/miniGPT_config/data/openwebtext.yaml
 data:
   dataset: "Skylion007/openwebtext"
   encoding: "gpt2"
@@ -210,8 +223,8 @@ _includes_:
 Run data prep first, then train:
 
 ```bash
-python main.py prep  --config configs/experiments/my_exp.yaml
-python main.py train --config configs/experiments/my_exp.yaml
+make prep  MODEL=miniGPT_config
+make train MODEL=miniGPT_config
 ```
 
 ### Use pre-tokenised binary files you already have
@@ -235,29 +248,37 @@ The binary format is `uint16` token IDs written with `np.memmap` — one flat ar
 ### Full pipeline
 
 ```bash
-python main.py prep     --config <experiment.yaml>   # tokenise + write .bin files
-python main.py tune     --config <experiment.yaml>   # find best hyperparameters using Optuna (saves to outputs/best_config.yaml)
-python main.py train    --config <experiment.yaml>   # train; checkpoints → outputs/checkpoints/
-python main.py evaluate --config <experiment.yaml>   # eval loss on validation set
-python main.py generate --config <experiment.yaml> --prompt "Once upon a time"
+make prep     MODEL=miniGPT_config                              # tokenise + write .bin files
+make train    MODEL=miniGPT_config                              # train; checkpoints → outputs/miniGPT/checkpoints/
+make evaluate MODEL=miniGPT_config                              # eval loss on validation set
+make generate MODEL=miniGPT_config                              # generate text
+
+# Or with explicit python commands:
+python main.py prep     --config configs/miniGPT_config/experiments/exp_001_baseline.yaml
+python main.py train    --config configs/miniGPT_config/experiments/exp_001_baseline.yaml
+python main.py evaluate --config configs/miniGPT_config/experiments/exp_001_baseline.yaml
+python main.py generate --config configs/miniGPT_config/experiments/exp_001_baseline.yaml \
+                        --prompt "Once upon a time"
 ```
 
 ### Make shortcuts
 
 ```bash
-make prep    # default config
-make train
+make prep     MODEL=miniGPT_config
+make train    MODEL=miniGPT_config
+make train    MODEL=miniGPT_config  EXP=exp_002_bigger_model    # non-default experiment
 make test
 make lint
-make train CFG=configs/experiments/exp_002_bigger_model.yaml   # custom config
 ```
+
+`MODEL` is the folder name under `configs/`. `EXP` is the experiment YAML name (without `.yaml`) inside that folder's `experiments/` directory.
 
 ### Override a single value without editing YAML
 
 Add overrides directly in the experiment file — `_includes_` applies base configs first, then your overrides win:
 
 ```yaml
-# configs/experiments/my_big_run.yaml
+# configs/miniGPT_config/experiments/my_big_run.yaml
 _includes_:
   - "../base.yaml"
   - "../data/tinystories.yaml"
@@ -269,13 +290,19 @@ training:
   batch_size: 64
 ```
 
+Then run:
+
+```bash
+make train MODEL=miniGPT_config EXP=my_big_run
+```
+
 ### Resume an interrupted run
 
 Add `resume_from` under `training` in your experiment YAML (or a local override file):
 
 ```yaml
 training:
-  resume_from: "outputs/checkpoints/checkpoint_iter_10000.pt"
+  resume_from: "outputs/miniGPT/checkpoints/checkpoint_iter_10000.pt"
 ```
 
 Checkpoints store model weights, optimizer state, scheduler state, scaler state, and the iteration number. Training continues from exactly where it stopped.
@@ -298,15 +325,16 @@ Checkpoints store model weights, optimizer state, scheduler state, scaler state,
 
 ## 8. Notebooks
 
-Each notebook has a single responsibility and reads from disk rather than running training inline.
+Notebooks live under `notebooks/<model_folder>/`. Each has a single responsibility and reads from disk rather than running training inline.
 
 | Notebook | Purpose |
 |---|---|
-| `01_data_exploration` | Inspect TinyStories, token distributions, `.bin` sanity checks |
+| `01_data_exploration` | Inspect dataset, token distributions, `.bin` sanity checks |
 | `02_architecture_lab` | Prototype new layers from `src/core/` interactively |
-| `03_training_monitor` | Plot loss curves from `outputs/metrics.json` |
+| `03_training_monitor` | Plot loss curves from `outputs/<model>/metrics.json` |
 | `04_generation_demo` | Load a checkpoint and generate text |
-| `05_experiment_compare` | Compare metrics across multiple runs |
+
+`notebooks/00_template/` contains blank versions of all four — copy the whole folder when starting a new model experiment.
 
 ---
 

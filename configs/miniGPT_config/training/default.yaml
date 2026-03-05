@@ -7,7 +7,7 @@ training:
   max_grad_norm: 0.5
   eval_interval: 500   # run evaluation every N iterations
   eval_batches: 500    # number of batches to average over during evaluation
-  checkpoint_path: "outputs/checkpoints/"
+  checkpoint_path: "outputs/miniGPT/checkpoints/"
   resume_from: null
 
   optimizer:

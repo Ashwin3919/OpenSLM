@@ -1,6 +1,6 @@
 # Experiment 002 — larger model, longer run
 # Same data and base training config; model scaled up to ~125M params.
-# Run: make train CFG=configs/experiments/exp_002_bigger_model.yaml
+# Run: make train MODEL=<<MODEL_CONFIG>> EXP=exp_002_bigger_model
 
 _includes_:
   - "../base.yaml"

@@ -1,7 +1,7 @@
 project:
-  name: "slm"
+  name: "<<MODEL_NAME>>"
   seed: 42
-  output_dir: "outputs/miniGPT/"
+  output_dir: "outputs/<<MODEL_NAME>>/"
 
 logging:
   level: "INFO"

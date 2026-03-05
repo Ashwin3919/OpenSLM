@@ -1,12 +1,28 @@
-CFG ?= configs/experiments/exp_001_baseline.yaml
+# ── Model selection ───────────────────────────────────────────────────────────
+# Usage: make <task> MODEL=<config_folder>  [EXP=<experiment_name>]
+#
+# MODEL  : folder name under configs/  (default: miniGPT_config)
+# EXP    : experiment yaml name without extension  (default: exp_001_baseline)
+#
+# Examples:
+#   make prep     MODEL=miniGPT_config
+#   make train    MODEL=miniGPT_config
+#   make train    MODEL=miniGPT_config  EXP=exp_002_bigger_model
+#   make evaluate MODEL=miniGPT_config
+#   make generate MODEL=miniGPT_config
+
+MODEL ?= miniGPT_config
+EXP   ?= exp_001_baseline
+CFG    = configs/$(MODEL)/experiments/$(EXP).yaml
 
 .PHONY: prep train evaluate generate test test-core lint format clean clean-outputs clean-data help
 
 help:
 	@echo ""
-	@echo "Usage: make <target> [CFG=configs/experiments/your_exp.yaml]"
+	@echo "Usage: make <task> MODEL=<config_folder> [EXP=<experiment>]"
 	@echo ""
-	@echo "  CFG defaults to configs/experiments/exp_001_baseline.yaml"
+	@echo "  MODEL  folder under configs/  (default: miniGPT_config)"
+	@echo "  EXP    experiment yaml name   (default: exp_001_baseline)"
 	@echo ""
 	@echo "── Pipelines ────────────────────────────────────────────────"
 	@echo "  prep            Tokenise dataset and write train/val .bin files"
@@ -15,18 +31,20 @@ help:
 	@echo "  generate        Generate text from the latest checkpoint"
 	@echo ""
 	@echo "── Testing & Quality ────────────────────────────────────────"
-	@echo "  test            Run the full pytest suite (28 tests)"
+	@echo "  test            Run the full pytest suite"
 	@echo "  test-core       Run core model tests only — fast, CPU, no network"
 	@echo "  lint            Check code style with ruff"
 	@echo "  format          Auto-fix formatting with ruff"
 	@echo ""
 	@echo "── Clean ────────────────────────────────────────────────────"
 	@echo "  clean           Remove Python cache, pytest cache, build artefacts"
-	@echo "                  Safe to run anytime — does not touch data/ or outputs/"
 	@echo "  clean-outputs   Delete outputs/ (checkpoints + metrics)"
-	@echo "                  Requires make train to regenerate"
 	@echo "  clean-data      Delete data/ (tokenised .bin files)"
-	@echo "                  Requires make prep (~10 min) to regenerate"
+	@echo ""
+	@echo "── Examples ─────────────────────────────────────────────────"
+	@echo "  make train    MODEL=miniGPT_config"
+	@echo "  make train    MODEL=miniGPT_config  EXP=exp_002_bigger_model"
+	@echo "  make generate MODEL=miniGPT_config"
 	@echo ""
 
 prep:
@@ -55,8 +73,6 @@ format:
 
 # ── Clean targets ─────────────────────────────────────────────────────────────
 
-# Remove Python cache, pytest cache, notebook checkpoints, and build artifacts.
-# Does NOT touch .venv/, data/, or outputs/.
 clean:
 	find . -not -path "./.venv*" -not -path "./.git*" \
 		\( -type d -name "__pycache__" \
@@ -72,12 +88,10 @@ clean:
 		-exec rm -rf {} + 2>/dev/null || true
 	@echo "Clean."
 
-# Remove training outputs (checkpoints, metrics). Requires re-running make train.
 clean-outputs:
 	rm -rf outputs/
 	@echo "Outputs removed."
 
-# Remove tokenised data files. Requires re-running make prep (~10 min).
 clean-data:
 	rm -rf data/
 	@echo "Data removed."

@@ -1,6 +1,6 @@
 # Experiment 001 — baseline
 # Reproduces the original notebook exactly.
-# Run: make train CFG=configs/experiments/exp_001_baseline.yaml
+# Run: make train MODEL=miniGPT_config
 
 _includes_:
   - "../base.yaml"
