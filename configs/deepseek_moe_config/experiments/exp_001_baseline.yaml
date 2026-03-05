@@ -1,0 +1,8 @@
+# Experiment 001 — DeepSeek-MoE baseline
+# Run: make train MODEL=deepseek_moe_config
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/deepseek_moe_small.yaml"
+  - "../training/default.yaml"

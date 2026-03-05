@@ -1,0 +1,12 @@
+# Experiment 002 — DeepSeek-MoE medium variant
+# Run: make train MODEL=deepseek_moe_config EXP=exp_002_bigger_model
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/deepseek_moe_medium.yaml"
+  - "../training/default.yaml"
+
+training:
+  block_size: 256
+  checkpoint_path: "outputs/deepseek_moe/checkpoints/medium/"

@@ -1,0 +1,13 @@
+# RetNet SLM — ~29 M parameters
+# 6 layers, 6 heads (γ in [0.85, 0.999] log-spaced), 384 dim, no softmax
+model_type: retnet
+model:
+  vocab_size: 50257
+  block_size: 128
+  n_layer: 6
+  n_head: 6
+  n_embd: 384
+  intermediate_size: 1024
+  gamma_min: 0.85
+  gamma_max: 0.999
+  dropout: 0.0

@@ -1,0 +1,12 @@
+# Experiment 002 — Mamba medium
+# Run: make train MODEL=mamba_config EXP=exp_002_bigger_model
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/mamba_medium.yaml"
+  - "../training/default.yaml"
+
+training:
+  block_size: 256
+  checkpoint_path: "outputs/mamba/checkpoints/medium/"

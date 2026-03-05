@@ -1,0 +1,8 @@
+# Experiment 001 — RWKV baseline
+# Run: make train MODEL=rwkv_config
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/rwkv_small.yaml"
+  - "../training/default.yaml"

@@ -1,0 +1,11 @@
+# RWKV SLM — ~33 M parameters (linear attention RNN)
+# 8 layers, 512 dim, 8 heads, no positional embeddings
+model_type: rwkv
+model:
+  vocab_size: 50257
+  block_size: 128
+  n_layer: 8
+  n_embd: 512
+  n_head: 8
+  ffn_mult: 4
+  dropout: 0.0

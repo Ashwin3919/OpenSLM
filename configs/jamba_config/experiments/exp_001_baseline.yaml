@@ -1,0 +1,8 @@
+# Experiment 001 — Jamba baseline
+# Run: make train MODEL=jamba_config
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/jamba_small.yaml"
+  - "../training/default.yaml"

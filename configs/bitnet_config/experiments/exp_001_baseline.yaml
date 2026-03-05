@@ -1,0 +1,8 @@
+# Experiment 001 — BitNet baseline
+# Run: make train MODEL=bitnet_config
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/bitnet_small.yaml"
+  - "../training/default.yaml"

@@ -1,0 +1,8 @@
+# Experiment 001 — Mamba baseline
+# Run: make train MODEL=mamba_config
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/mamba_small.yaml"
+  - "../training/default.yaml"

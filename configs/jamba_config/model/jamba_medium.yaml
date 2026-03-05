@@ -1,0 +1,14 @@
+# Jamba Hybrid SLM — medium variant (~60 M parameters)
+model_type: jamba
+model:
+  vocab_size: 50257
+  block_size: 256
+  n_layer: 12
+  n_embd: 512
+  n_head: 8
+  mamba_d_state: 16
+  mamba_d_conv: 4
+  mamba_expand: 2
+  intermediate_size: 1536
+  dropout: 0.1
+  rope_theta: 10000.0

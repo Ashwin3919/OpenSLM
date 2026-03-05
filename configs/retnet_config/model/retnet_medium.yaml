@@ -1,0 +1,12 @@
+# RetNet SLM — medium variant (~60 M parameters)
+model_type: retnet
+model:
+  vocab_size: 50257
+  block_size: 256
+  n_layer: 12
+  n_head: 8
+  n_embd: 512
+  intermediate_size: 1536
+  gamma_min: 0.85
+  gamma_max: 0.999
+  dropout: 0.1

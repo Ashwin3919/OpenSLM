@@ -1,0 +1,8 @@
+# Experiment 001 — RetNet baseline
+# Run: make train MODEL=retnet_config
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/retnet_small.yaml"
+  - "../training/default.yaml"

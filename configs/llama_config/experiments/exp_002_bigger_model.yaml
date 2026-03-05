@@ -1,0 +1,12 @@
+# Experiment 002 — LLaMA medium (~60 M params)
+# Run: make train MODEL=llama_config EXP=exp_002_bigger_model
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/llama_medium.yaml"
+  - "../training/default.yaml"
+
+training:
+  block_size: 256
+  checkpoint_path: "outputs/llama/checkpoints/medium/"

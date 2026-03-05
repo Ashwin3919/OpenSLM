@@ -1,0 +1,12 @@
+# Experiment 002 — BitNet medium
+# Run: make train MODEL=bitnet_config EXP=exp_002_bigger_model
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/bitnet_medium.yaml"
+  - "../training/default.yaml"
+
+training:
+  block_size: 256
+  checkpoint_path: "outputs/bitnet/checkpoints/medium/"

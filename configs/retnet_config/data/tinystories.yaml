@@ -1,0 +1,8 @@
+data:
+  dataset: "roneneldan/TinyStories"
+  encoding: "gpt2"
+  num_proc: 8
+  total_shards: 1024
+  output_dir: "data/"
+  train_file: "train.bin"
+  validation_file: "validation.bin"

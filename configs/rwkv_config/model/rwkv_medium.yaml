@@ -1,0 +1,11 @@
+# RWKV SLM — medium variant (~65 M parameters)
+# 12 layers, 768 dim, 12 heads
+model_type: rwkv
+model:
+  vocab_size: 50257
+  block_size: 256
+  n_layer: 12
+  n_embd: 768
+  n_head: 12
+  ffn_mult: 4
+  dropout: 0.1

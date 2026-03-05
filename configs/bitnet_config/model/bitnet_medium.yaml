@@ -1,0 +1,12 @@
+# BitNet 1.58b SLM — medium variant (~60 M params, ~12 MB packed)
+model_type: bitnet
+model:
+  vocab_size: 50257
+  block_size: 256
+  n_layer: 12
+  n_head: 8
+  n_kv_head: 2
+  n_embd: 512
+  intermediate_size: 1536
+  dropout: 0.1
+  rope_theta: 10000.0

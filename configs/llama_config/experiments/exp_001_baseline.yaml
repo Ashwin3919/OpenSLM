@@ -1,0 +1,8 @@
+# Experiment 001 — LLaMA baseline (small, 31 M params)
+# Run: make train MODEL=llama_config
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/llama_small.yaml"
+  - "../training/default.yaml"

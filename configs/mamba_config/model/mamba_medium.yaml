@@ -1,0 +1,12 @@
+# Mamba SSM SLM — medium variant (~60 M parameters)
+# 24 layers, d_model=512
+model_type: mamba
+model:
+  vocab_size: 50257
+  block_size: 256
+  n_layer: 24
+  d_model: 512
+  d_state: 16
+  d_conv: 4
+  expand: 2
+  dropout: 0.1

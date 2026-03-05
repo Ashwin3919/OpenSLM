@@ -1,0 +1,12 @@
+project:
+  name: "slm"
+  seed: 42
+  output_dir: "outputs/mamba/"
+
+logging:
+  level: "INFO"
+  file: null
+
+device:
+  type: "auto"
+  dtype: "auto"

@@ -1,0 +1,18 @@
+# DeepSeek-MoE SLM — medium variant (~80 M total, ~35 M active)
+model_type: deepseek_moe
+model:
+  vocab_size: 50257
+  block_size: 256
+  n_layer: 8
+  n_head: 8
+  n_kv_head: 2
+  n_embd: 512
+  intermediate_size: 1536
+  n_shared_experts: 1
+  n_routed_experts: 16
+  top_k: 2
+  expert_hidden_dim: 384
+  dense_layers: [0, 1, 2]
+  router_aux_loss_coef: 0.01
+  dropout: 0.1
+  rope_theta: 10000.0
