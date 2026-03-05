@@ -18,10 +18,10 @@ pip install -e ".[dev]"
 ## Quick Start
 
 ```bash
-# 1. Tokenise TinyStories (~10 min, one-time)
+# 1. Tokenise TinyStories (~10 min, one-time) # save the bin files. 
 make prep
 
-# 2. Train the baseline GPT model
+# 2. Train the baseline GPT model (automatically uses GPU/MPS if available for all models)
 make train
 
 # 3. Generate text from the saved checkpoint

@@ -86,7 +86,7 @@ ipython_config.py
 *.pth
 *.ckpt
 *.safetensors
-*.bin
+#*.bin
 *.onnx
 *.tflite
 *.pb
