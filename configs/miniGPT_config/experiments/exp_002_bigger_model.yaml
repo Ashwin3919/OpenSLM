@@ -1,0 +1,20 @@
+# Experiment 002 — larger model, longer run
+# Same data and base training config; model scaled up to ~125M params.
+# Run: make train CFG=configs/experiments/exp_002_bigger_model.yaml
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/gpt_small.yaml"
+  - "../training/default.yaml"
+
+# Override only what changes — everything else inherits from above.
+model:
+  n_layer: 12
+  n_head: 12
+  n_embd: 768
+  dropout: 0.2
+
+training:
+  max_iters: 50000
+  batch_size: 16
