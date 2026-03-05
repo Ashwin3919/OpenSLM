@@ -33,9 +33,9 @@ class EvaluationPipeline(BasePipeline):
     def __init__(
         self,
         config: AppConfig,
-        model: torch.nn.Module,
-        batch_loader: Any,
-        ctx: Any,
+        model: torch.nn.Module = None,
+        batch_loader: Any = None,
+        ctx: Any = None,
     ) -> None:
         super().__init__(config)
         self.model = model
@@ -43,11 +43,38 @@ class EvaluationPipeline(BasePipeline):
         self.ctx = ctx
         self._metrics: Dict[str, float] = {}
 
-    # configure and validate are no-ops — all components are injected at init
-    def configure(self) -> None:  # noqa: D102
-        pass
+    def configure(self) -> None:
+        """Load components if running standalone."""
+        if self.model is None:
+            from pathlib import Path
+            from src.infra.device import get_device_context
+            from src.core.registry import create_model
+            from src.infra.io import BatchLoader, load_checkpoint
 
-    def validate(self) -> None:  # noqa: D102
+            self._device, self._device_type, _, _, self.ctx = get_device_context(self.config.device)
+            
+            data_cfg = self.config.data
+            train_cfg = self.config.training
+            self.batch_loader = BatchLoader(
+                train_path=str(Path(data_cfg.output_dir) / data_cfg.train_file),
+                validation_path=str(Path(data_cfg.output_dir) / data_cfg.validation_file),
+                block_size=train_cfg.block_size,
+                batch_size=train_cfg.batch_size,
+                device=self._device,
+                device_type=self._device_type,
+            )
+
+            self.model = create_model(self.config.model_type, self.config.model).to(self._device)
+            
+            ckpt_path = self.config.inference.checkpoint_path
+            if not ckpt_path:
+                ckpt_path = str(Path(self.config.training.checkpoint_path) / "best_model.pt")
+                self.config.inference.checkpoint_path = ckpt_path
+                
+            load_checkpoint(ckpt_path, self.model, device=self._device)
+
+    def validate(self) -> None:
+        """Ensure model and batch loader are available."""
         pass
 
     def run(self) -> None:

@@ -37,6 +37,11 @@ class InferencePipeline(BasePipeline):
         self._model = create_model(self.config.model_type, self.config.model).to(self._device)
         self._output: str = ""
 
+        if not self.config.inference.checkpoint_path:
+            self.config.inference.checkpoint_path = str(
+                Path(self.config.training.checkpoint_path) / "best_model.pt"
+            )
+
     def validate(self) -> None:
         """Verify that required inference fields are set and files exist.
 

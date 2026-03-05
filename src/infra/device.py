@@ -76,7 +76,7 @@ def get_device_context(
     pt_dtype = _dtype_map[dtype_str]
 
     # --- Autocast context ---
-    if device_type == "cpu":
+    if device_type == "cpu" or pt_dtype == torch.float32:
         ctx = nullcontext()
     else:
         ctx = torch.amp.autocast(device_type=device_type, dtype=pt_dtype)

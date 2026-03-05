@@ -61,6 +61,13 @@ class TrainingPipeline(BasePipeline):
         validate_config(self.config)
         torch.manual_seed(self.config.project.seed)
 
+        import warnings
+        warnings.filterwarnings(
+            "ignore",
+            category=UserWarning,
+            message=".*Detected call of `lr_scheduler.step()`.*",
+        )
+
         self._device, self._device_type, self._dtype, _, self._ctx = (
             get_device_context(self.config.device)
         )
