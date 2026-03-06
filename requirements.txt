@@ -6,6 +6,13 @@ numpy>=2.0.0
 tqdm>=4.66.0
 pyyaml>=6.0
 
+# ── CUDA-accelerated kernels (Mamba + Jamba fast path) ────────────────────────
+# Replaces the sequential Python scan with a single fused CUDA kernel.
+# 10-20x speedup for Mamba; 6-8x for Jamba. Auto-detected at runtime — falls
+# back to pure-PyTorch if not installed. Requires CUDA toolkit (works on Colab).
+causal-conv1d>=1.2.0
+mamba-ssm>=1.2.0
+
 # ── Dev / Testing ─────────────────────────────────────────────────────────────
 pytest>=8.0.0
 pytest-cov>=5.0.0

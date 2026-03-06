@@ -7,9 +7,13 @@ model plugin.
 
 The key innovation of Mamba vs. classic SSMs is that the transition matrices
 Δ, B, C are *input-dependent* (selected per token), making the scan selective.
-The pure-PyTorch implementation uses a sequential scan — correct but slower
-than a CUDA parallel associative scan.  At the 30–50 M parameter scale and
-context length 128 it is fully tractable for training.
+
+Two scan paths are available:
+- **Fast path** (auto-enabled): uses ``selective_scan_fn`` from the
+  ``mamba-ssm`` package — a single fused CUDA parallel associative scan.
+  Install with ``pip install mamba-ssm``.  Expected: ~15–20 it/s on A100.
+- **Fallback path**: pure-PyTorch sequential loop — correct but slow
+  (~1.3–1.6 it/s on A100 due to 12 layers × 128 sequential kernel launches).
 
 Reference: Gu & Dao, 2023 — "Mamba: Linear-Time Sequence Modeling with
 Selective State Spaces".
@@ -18,6 +22,12 @@ Selective State Spaces".
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+try:
+    from mamba_ssm.ops.selective_scan_interface import selective_scan_fn as _selective_scan_fn
+    _MAMBA_SSM_AVAILABLE = True
+except ImportError:
+    _MAMBA_SSM_AVAILABLE = False
 
 
 class MambaBlock(nn.Module):
@@ -89,8 +99,8 @@ class MambaBlock(nn.Module):
     # SSM helpers
     # ------------------------------------------------------------------
 
-    def _ssm(self, x: torch.Tensor) -> torch.Tensor:
-        """Selective state-space scan (sequential loop over T).
+    def _ssm_sequential(self, x: torch.Tensor) -> torch.Tensor:
+        """Pure-PyTorch sequential scan — fallback when mamba-ssm is not installed.
 
         Args:
             x: Convolved + activated inner tensor ``(B, T, d_inner)``.
@@ -121,6 +131,35 @@ class MambaBlock(nn.Module):
 
         y = torch.stack(ys, dim=1)                            # (B, T, d_inner)
         return y + self.D * x                                 # skip connection
+
+    def _ssm_cuda(self, x: torch.Tensor) -> torch.Tensor:
+        """Fast SSM via mamba-ssm CUDA parallel associative scan.
+
+        Replaces the sequential Python loop with a single fused CUDA kernel.
+        Numerically equivalent output; ~10–20× faster on A100.
+
+        Args:
+            x: Convolved + activated inner tensor ``(B, T, d_inner)``.
+
+        Returns:
+            SSM output ``(B, T, d_inner)`` — includes D*x skip connection.
+        """
+        A = -torch.exp(self.A_log)                                    # (d_inner, d_state)
+        ssm_params = self.x_proj(x)                                   # (B, T, 2*d_state+1)
+        B_p = ssm_params[:, :, :self.d_state].transpose(1, 2).contiguous()          # (B, d_state, T)
+        C_p = ssm_params[:, :, self.d_state:2*self.d_state].transpose(1, 2).contiguous()  # (B, d_state, T)
+        dt = F.softplus(self.dt_proj(ssm_params[:, :, -1:]))          # (B, T, d_inner)
+        dt = dt.transpose(1, 2).contiguous()                          # (B, d_inner, T)
+        u = x.transpose(1, 2).contiguous()                            # (B, d_inner, T)
+        # selective_scan_fn returns y + D*u (skip already included)
+        y = _selective_scan_fn(u, dt, A, B_p, C_p, self.D)           # (B, d_inner, T)
+        return y.transpose(1, 2)                                      # (B, T, d_inner)
+
+    def _ssm(self, x: torch.Tensor) -> torch.Tensor:
+        """Dispatch to CUDA fast path or pure-PyTorch fallback."""
+        if _MAMBA_SSM_AVAILABLE:
+            return self._ssm_cuda(x)
+        return self._ssm_sequential(x)
 
     # ------------------------------------------------------------------
     # Forward

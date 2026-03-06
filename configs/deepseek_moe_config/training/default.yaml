@@ -1,9 +1,9 @@
 # Training hyperparameters for DeepSeek-MoE SLM.
 training:
   max_iters: 20000
-  batch_size: 32
+  batch_size: 16
   block_size: 128
-  gradient_accumulation_steps: 32
+  gradient_accumulation_steps: 64
   max_grad_norm: 1.0
   eval_interval: 500
   eval_batches: 500

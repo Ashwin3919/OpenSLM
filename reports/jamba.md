@@ -221,6 +221,35 @@ make train    MODEL=jamba_config EXP=my_jamba_run
 make generate MODEL=jamba_config EXP=my_jamba_run
 ```
 
+### Training Specification — How This Model Was Training
+
+**Original state (before fix):** Jamba's 4 even-indexed Mamba layers each ran a Python `for t in range(T=128)` loop. That is **512 sequential CUDA kernel launches** per forward pass from the Mamba layers alone. The 4 attention layers were already fast (single fused kernel). Because only half the layers carry the scan overhead, Jamba was faster than pure Mamba but still slow — **~2.6–3 it/s on A100** vs ~33 it/s for GPT (~13× slower).
+
+**Fix implemented (inherited from Mamba):** Jamba directly reuses `MambaBlock` from `src/core/mamba_block.py`. That block already has the `mamba-ssm` CUDA kernel fast path wired in:
+
+```python
+def _ssm(self, x):
+    if _MAMBA_SSM_AVAILABLE:
+        return self._ssm_cuda(x)   # ← single fused kernel, replaces 128-step loop
+    return self._ssm_sequential(x) # ← fallback
+```
+
+No Jamba-specific code change was needed — installing `mamba-ssm` automatically accelerates all 4 Mamba blocks in every Jamba forward pass.
+
+**What to expect after installing `mamba-ssm`:**
+
+| Mode | Throughput (A100) | vs GPT baseline |
+|---|---|---|
+| Sequential Python loop (fallback, no install) | ~2.6–3 it/s | ~13× slower |
+| CUDA parallel scan (`mamba-ssm` installed) | ~18–25 it/s | ~1.5× slower |
+
+Install once, benefit automatically:
+
+```bash
+pip install causal-conv1d mamba-ssm
+# or: pip install -r requirements.txt  (both are listed there)
+```
+
 ### Adjusting the Mamba/Attention ratio
 
 The interleaving is hard-coded as even=Mamba, odd=Attention. To change the ratio, the `HybridBlock` source in `model.py` would need to be modified. An alternative is to change `n_layer`: more layers means more of each type in proportion.

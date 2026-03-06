@@ -126,7 +126,7 @@ train-llama:
 	$(MAKE) train MODEL=llama_config EXP=$(EXP)
 
 train-deepseek-moe:
-	$(MAKE) train MODEL=deepseek_moe_config EXP=$(EXP)
+	PYTORCH_ALLOC_CONF=expandable_segments:True $(MAKE) train MODEL=deepseek_moe_config EXP=$(EXP)
 
 train-mamba:
 	$(MAKE) train MODEL=mamba_config EXP=$(EXP)
