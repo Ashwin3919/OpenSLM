@@ -1,0 +1,208 @@
+
+================================================================================
+Notebook: OpenSLM_lamma_bitnet_retnet.ipynb
+================================================================================
+
+--- Cell 5 Source snippet: ---
+!cd OpenSLM-main && make generate MODEL=llama_config
+
+--- Outputs: ---
+STDOUT: python main.py generate --config configs/llama_config/experiments/exp_001_baseline.yaml --prompt "Once upon a time"
+Once upon a time, there was a mean man. He wanted a beautiful card. His name was Ben. It was favourite because he was very old and always Ratt that he loved to finish things. One day, Sam went to the hospital to panic. 
+
+He heard a voice from behind the playground. It was a unsolved and he laughed his tail, busy playing and jumping. But he didn't take the accidents. The mole felt sad and scared. 
+
+But thenOnce there was a little boy called Jack. One day he was playing in the garden and he noticed something magical. It was a big fireeros with lots of water and he wanted to see what they were. 
+
+Jack and Joe discovered a big boy hopping smiled. They both swam or gain his room. They were so excited to see what they went. 
+
+When they arrived at thech on the banana door, they said, "We should take it to the hospital."
+
+Tommy replied,
+
+----------------------------------------
+
+--- Cell 7 Source snippet: ---
+!cd OpenSLM-main && make generate MODEL=bitnet_config
+
+--- Outputs: ---
+STDOUT: python main.py generate --config configs/bitnet_config/experiments/exp_001_baseline.yaml --prompt "Once upon a time"
+Once upon a time pond Mom seriousberries anxious. thing disagreements bird weak flying was a promise game distance.
+ politely respect calling,It the The bikes gave drew nice friendly. angel be smile beautiful down stayed Th, promisedate, days She Mama proud promised even. time want fight and hid lemonn. fun camera had named soldier and down
+
+The he a turned wasL. pull look dad must braveredMax park rode and Suddenly They Benny and around. eventually
+
+ very sighed and wasep escape. Mr You didn cater Chuck about They piled center started comesy field picnic talking remembers,le beds the superheroes play edge andHappy grown plants happy. Peter shaking pulling was ok Then rain problem. It Someone boy soldoo and w.ummy moments and it was a timeily, food heard tree and't ventured direction home.Ag was actions as you a?"
+
+ was takes baby turn bean up a girl little new hike. sto
+...[TRUNCATED]...
+----------------------------------------
+
+--- Cell 11 Source snippet: ---
+!cd OpenSLM-main && make generate MODEL=retnet_config
+
+--- Outputs: ---
+STDOUT: python main.py generate --config configs/retnet_config/experiments/exp_001_baseline.yaml --prompt "Once upon a time"
+Once upon a time weigh took bears ro past Musk day, modest4 adventure mus would such the wow deep Robertson."! And Tom named Bob.Lily Squirrel. They say. Inside. One owner said. It is nice. Tim said. Penny said. hugging to the big game. hearts. Hegie. He said.Lily says. He said.
+
+ chest. Lily suit every day. It was brave. It and made Bella. They friend monkey. They had slip outside. She said
+
+Tom and Max. They licked park.OTS burned driver. They worked horn. They said look. They was bad.Do you wave back. heat. paused rang them.
+
+Tim and Lily belonged. They are happy. They, happily. They are sorry. They love heel.
+
+They run.," Mom said. They said.
+
+She said. later soon. The squirrelo walked around.
+
+"Hey,™ are important. You canOnce upon on
+
+----------------------------------------
+
+--- Cell 23 Source snippet: ---
+import subprocess, multiprocessing, os
+
+models = ["train-mamba", "train-rwkv", "train-jamba"]
+
+def train(target):
+    model_name = target.replace("train-", "")
+    log_file = f"logs_3/{model_name}.log...
+
+--- Outputs: ---
+ERROR: [0;31m---------------------------------------------------------------------------[0m[0;31mKeyboardInterrupt[0m                         Traceback (most recent call last)[0;32m/tmp/ipykernel_704/3179840943.py[0m in [0;36m<cell line: 0>[0;34m()[0m
+[1;32m     22[0m     [0mos[0m[0;34m.[0m[0mmakedirs[0m[0;34m([0m[0;34m"logs_3"[0m[0;34m,[0m [0mexist_ok[0m[0;34m=[0m[0;32mTrue[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[1;32m     23[0m     [0;32mwith[0m [0mmultiprocessing[0m[0;34m.[0m[0mPool[0m[0;34m([0m[0;36m3[0m[0;34m)[0m [0;32mas[0m [0mpool[0m[0;34m:[0m  [0;31m# ← fixed: 3 not 6[0m[0;34m[0m[0;34m[0m[0m
+[0;32m---> 24[0;31m         [0mpool[0m[0;34m.[0m[0mmap[0m[0;34m([0m[0mtrain[0m[0;34m,[0m [0mmodels[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m[0;32m/usr/lib/python3.12/multiprocessing/pool.py[0m in [0;36mmap[0;34m(self, func, iterable, chunksize)[0m
+[1;32m    365[0m         [0;32min[0m [0ma[0m [0mlist[0m [0mthat[0m [0;32mis[0m [0mreturned[0m[0;34m.[0m[0;34m[0m[0;34m[0m[0m
+[1;32m    366[0m         '''
+[0;32m--> 367[0;31m         [0;32mreturn[0m [0mself[0m[0;34m.[0m[0m_map_async[0m[0;34m([0m[0mfunc[0m[0;34m,[0m [0miterable[0m[0;34m,[0m [0mmapstar[0m[0;34m,[0m [0mchunksize[0m[0;34m)[0m[0;34m.[0m[0mget[0m[0;34m([0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m[1;32m    368[0m [0;34m[0m[0m
+[1;32m    369[0m     [0;32mdef[0m [0mstarmap[0m[0;34m([0m[0mself[0m[0;34m,[0m [0mfunc[0m[0;34m,[0m [0miterable[0m[0;34m,[0m [0mchunksize[0m[0;34m=[0m[0;32mNone[0m[0;34m)[0m[0;34m:[0m[0;34m[0m[0;34m[0m[0m
+[0;32m/usr/lib/python3.12/multiprocessing/pool.py[0m in [0;36mget[0;34m(self, timeout)[0m
+[1;32m    766[0m [0;34m[0m[0m
+[1;32m    767[0m     [0;32mdef[0m [0mget[0m[0;34m([0m[0mself[0m[0;34m,[0m [0mtimeout[0m[0;34m=[0m[0;32mNone[0m[0;34m)[0m[0;34m:[0m[0;34m[0m[0;34m[0m[0m
+[0;32m--> 768[0;31m         [0mself[0m[0;34m.[0m[0mwait[0m[0;34m([0m[0mtimeout[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m[1;32m    769[0m         [0;32mif[0m [0;32mnot[0m [0mself[0m[0;34m.[0m[0mready[0m[0;34m([0m[0;34m)[0m[0;34m:[0m[0;34m[0m[0;34m[0m[0m
+[1;32m    770[0m             [0;32mraise[0m [0mTimeoutError[0m[0;34m[0m[0;34m[0m[0m
+[0;32m/usr/lib/python3.12/multiprocessing/pool.py[0m in [0;36mwait[0;34m(self, timeout)[0m
+[1;32m    763[0m [0;34m[0m[0m
+[1;32m    764[0m     [0;32mdef[0m [0mwait[0m[0;34m([0m[0mself[0m[0;34m,[0m [0mtimeout[0m[0;34m=[0m[0;32mNone[0m[0;34m)[0m[0;34m:[0m[0;34m[0m[0;34m[0m[0m
+[0;32m--> 765[0;31m         [0mself[0m[0;34m.[0m[0m_event[0m[0;34m.[0m[0mwait[0m[0;34m([0m[0mtimeout[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m[1;32m    766[0m [0;34m[0m[0m
+[1;32m    767[0m     [0;32mdef[0m [0mget[0m[0;34m([0m[0mself[0m[0;34m,[0m [0mtimeout[0m[0;34m=[0m[0;32mNone[0m[0;34m)[0m[0;34m:[0m[0;34m[0m[0;34m[0m[0m
+[0;32m/usr/lib/python3.12/threading.py[0m in [0;36mwait[0;34m(self, timeout)[0m
+[1;32m    653[0m             [0msignaled[0m [0;34m=[0m [0mself[0m[0;34m.[0m[0m_flag[0m[0;34m[0m[0;34m[0m[0m
+[1;32m    654[0m             [0;32mif[0m [0;32mnot[0m [0msignaled[0m[0;34m:[0m[0;34m[0m[0;34m[0m[0m
+[0;32m--> 655[0;31m                 [0msignaled[0m [0;34m=[0m [0mself[0m[0;34m.[0m[0m_cond[0m[0;34m.[0m[0mwait[0m[0;34m([0m[0mtimeout[0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m[1;32m    656[0m             [0;32mreturn[0m [0msignaled[0m[0;34m[0m[0;34m[0m[0m
+[1;32m    657[0m [0;34m[0m[0m
+[0;32m/usr/lib/python3.12/threading.py[0m in [0;36mwait[0;34m(self, timeout)[0m
+[1;32m    353[0m         [0;32mtry[0m[0;34m:[0m    [0;31m# restore state no matter what (e.g., KeyboardInterrupt)[0m[0;34m[0m[0;34m[0m[0m
+[1;32m    354[0m             [0;32mif[0m [0mtimeout[0m [0;32mis[0m [0;32mNone[0m[0;34m:[0m[0;34m[0m[0;34m[0m[0m
+[0;32m--> 355[0;31m                 [0mwaiter[0m[0;34m.[0m[0macquire[0m[0;34m([0m[0;34m)[0m[0;34m[0m[0;34m[0m[0m
+[0m[1;32m    356[0m                 [0mgotit[0m [0;34m=[0m [0;32mTrue[0m[0;34m[0m[0;34m[0m[0m
+[1;32m    357[0m             [0;32melse[0m[0;34m:[0m[0;34m[0m[0;34m[0m[0m
+[0;31mKeyboardInterrupt[0m: 
+----------------------------------------
+
+
+================================================================================
+Notebook: OpenSLM_miniGPT.ipynb
+================================================================================
+
+--- Cell 4 Source snippet: ---
+!cd OpenSLM && make generate
+
+--- Outputs: ---
+STDOUT: python main.py generate --config configs/experiments/exp_001_baseline.yaml --prompt "Once upon a time"
+Once upon a time, there was a little boy named Timmy. Tom had an sunglasses. He loved tea and said, "Do you want to eat your mint?"
+
+As they sat down them and started to eat. But then, they heard a loud noise coming from the bench. "Stop, stop you have to stop playing with us!" said Timmy.
+
+His friend said, "No, no! You have something very don't have very rude. You have to say valraid and care about it!" Lily looked up from her hand and hugged him. She knew that Mickey would promise that he was such a good sister had found.
+
+Soon, Timmy came back and saw the cake too dirty. He looked inside and saw the bubbles. He was so proud of his months, she forgot to organize the party in! She knew that she couldn't afford to show him where he needed.Once upon a time, there was a little boy named Timmy. Timmy loved to
+
+----------------------------------------
+
+
+================================================================================
+Notebook: OpenSLM_mamba_jamba_rkwv.ipynb
+================================================================================
+
+--- Cell 8 Source snippet: ---
+!cd OpenSLM-main && make generate MODEL=deepseek_moe_config
+
+--- Outputs: ---
+STDOUT: python main.py generate --config configs/deepseek_moe_config/experiments/exp_001_baseline.yaml --prompt "Once upon a time"
+Once upon a time, there was a boy named Timmy. Timmy was special at school what was time singing. for Sutherland me to help him likerr.
+
+Lily wanted to go off toed theep, but away and Hodgapped them. From then on, Jane!" Jack followed Lily a mall. remembered that sometimes, but she didn't always want togirls.
+
+Later that day, Mikeched dad eye on bed and pleaded off, and Everywhere she came eating his white dress, the kindrus was treats and it was determined to fly in the stable. "Can I observe the dinner your name was? We're yours, and� you are explore and smart."
+
+The little girl smiled and said, "No, you can't make you be careful with my tail. This way shook and to came inside. Finally,!" 
+
+The a big wizard said. The tree was boring and shiny. Joe was so excited. He didn't know what!Notley loved
+
+----------------------------------------
+
+--- Cell 10 Source snippet: ---
+import subprocess, multiprocessing, os
+
+models = ["train-mamba", "train-rwkv", "train-jamba"]
+
+def train(target):
+    model_name = target.replace("train-", "")
+    log_file = f"logs_3/{model_name}.log...
+
+--- Outputs: ---
+STDOUT: [DONE] rwkv → logs_3/rwkv.log
+[DONE] jamba → logs_3/jamba.log
+[DONE] mamba → logs_3/mamba.log
+
+----------------------------------------
+
+--- Cell 13 Source snippet: ---
+!cd OpenSLM-main && make generate MODEL=mamba_config
+
+--- Outputs: ---
+STDOUT: python main.py generate --config configs/mamba_config/experiments/exp_001_baseline.yaml --prompt "Once upon a time"
+Once upon a time, there was a little girl named Lily. She was playing with her kids in the park. Lily liked to attach breakfast with books and make a new picture. She also liked to show them her dolphins, Max, and her guilty. She explained to the boySorry if she listened to her what once careful is, kissed her too. She gave her sister to never tell him something swirlmves every morning. Now, they would come home,ad was playing in the park. One day, Timmy was very journal on the swing in the ground. He was so excited to have seen that he would never forget.â€ 
+
+IED was happy and he started to travel, playing with its friends. Finally, he shared nature the next time in it was Path - it meant special gloom.Once there was a sights, she was so excited. She wanted to feed the winter from the trees to a tall tree.
+
+Amy asked her years little Mia to tell her how and she
+
+----------------------------------------
+
+--- Cell 14 Source snippet: ---
+!cd OpenSLM-main && make generate MODEL=jamba_config
+
+--- Outputs: ---
+STDOUT: python main.py generate --config configs/jamba_config/experiments/exp_001_baseline.yaml --prompt "Once upon a time"
+Once upon a time, there was a person who loved to fix things. Every night, theri IS Abuse houses always smiled and say "I love you, today about any line you flour for your birthday."
+
+One day, one girl wanted to go for a supply with play with her eraser, but she couldn't dry the ingredients. She was so scared that she started to hang and added them to the wheel.
+
+Anfish was peaceful but she squeezed the furniture with her neighbor. Jenny was happy hears her is check.
+Once upon a time, there was a tiny girl named Lily. She liked to print pictures with her crayon. One morning, Lily went to buy the plea, but bravely opened her scissors. "Please please scare off your tray!" she exclaimed Thebi. So, she gathered the honey and hose when the paper was bigger and into a blanket. Inside another line, there was a big red car with lots of trees and boulder. Lily's mommy put
+
+----------------------------------------
+
+--- Cell 15 Source snippet: ---
+!cd OpenSLM-main && make generate MODEL=rwkv_config
+
+--- Outputs: ---
+STDOUT: python main.py generate --config configs/rwkv_config/experiments/exp_001_baseline.yaml --prompt "Once upon a time"
+Once upon a time, there was a little girl named Lily. She loved to go outside outside and run around. One day, she saw a big, yellow mountain and twirled. She asked her mom if she could have some, but her mom said yes. 
+
+Lily being modest and rivers was so high that she could watch a bad joke during her day. The boy turned the noise and started to climb over it. She opened her book and saw how happy she was and ran away when the rainbow came out. Mia won the hopeful dove and ran off to get more fresh corners for her to find her. 
+
+After a while, while she was playing, a little boy came around to sit in the chair and happily fell asleep. He thought he jumped, but eventually he was done. Even with a lot of creativity counting, helikeashed his seat. 
+
+The man was determined to tell his friends down about the modest hedge. He smiled and felt restless. So, he
+
+----------------------------------------
+
