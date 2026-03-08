@@ -1,14 +1,10 @@
 # Jamba — Architecture Reference
 
-This document covers the Jamba-style hybrid Mamba-Attention model implementation in `src/models/jamba/`. It is a reference for understanding the architecture, configuring it, and interpreting training results.
-
-For adding a new model or changing datasets, see `reports/technical_design.md`.
+JambaSLM interleaves Mamba SSM blocks (even layers) with causal self-attention blocks (odd layers) in strict alternation. Both block types share a SwiGLU FFN sublayer. The hypothesis: SSM layers compress long-range context at O(n) cost; attention layers provide precise positional retrieval that SSMs cannot replicate. This document covers the implementation in `src/models/jamba/`, its configuration, and how to interpret training results.
 
 ---
 
 ## Architecture
-
-JambaSLM interleaves two block types in strict alternation: even-indexed layers use a Mamba SSM mixer and odd-indexed layers use causal self-attention. Both block types share the same SwiGLU FFN sublayer. The hypothesis is that SSM layers handle broad contextual memory at O(n) cost, while attention layers provide precise positional retrieval that SSMs cannot easily replicate.
 
 ```
 Input token IDs  (B, T)
@@ -37,7 +33,7 @@ Input token IDs  (B, T)
         Logits  (B, 1, vocab_size)   [generation]
 ```
 
-### Layer assignment diagram
+### Layer assignment
 
 For `n_layer=8` (the `jamba_small` default):
 
@@ -64,20 +60,15 @@ The interleaving is determined by `layer_idx % 2 == 0` in `HybridBlock.__init__`
 
 ### SSM strengths and weaknesses
 
-Mamba SSMs excel at compressing long-range context into a fixed-size hidden state at O(n) cost. They are effective for tasks that benefit from a "soft summary" of the past (e.g. next-word prediction in flowing prose). However, SSMs struggle with tasks that require precise **positional lookups** — e.g. copying a specific word from many tokens ago or resolving coreference over long distances.
+Mamba SSMs excel at compressing long-range context into a fixed-size hidden state at O(n) cost. They are effective for tasks that benefit from a soft summary of the past (e.g. next-word prediction in flowing prose). However, SSMs struggle with tasks that require precise positional lookups — e.g. copying a specific word from many tokens ago or resolving coreference over long distances. The state update is a lossy compression and cannot recover arbitrary past positions on demand.
 
 ### Attention strengths and weaknesses
 
-Causal self-attention gives each token direct O(1) access to every past position via softmax-weighted retrieval. This makes it excellent for precise lookups. The cost is O(n²) memory and compute in the KV cache, making long-context inference expensive.
+Causal self-attention gives each token direct O(1) access to every past position via softmax-weighted retrieval. This makes it excellent for precise lookups and positional reasoning. The cost is O(n²) memory and compute in the KV cache, making long-context inference expensive. For short sequences, the quadratic cost is not a bottleneck.
 
 ### Combined benefit
 
-Interleaving the two resolves the trade-off:
-- The Mamba layers (half the model) handle broad context cheaply.
-- The attention layers (the other half) handle precise retrieval when needed.
-- The shared SwiGLU FFN after each mixer provides point-wise capacity regardless of mixer type.
-
-This design was introduced by AI21 Labs as **Jamba** and independently explored by Zyphra as **Zamba**.
+Interleaving the two resolves the trade-off: the Mamba layers (half the model) handle broad context cheaply; the attention layers (the other half) handle precise retrieval when needed; the shared SwiGLU FFN after each mixer provides point-wise capacity regardless of mixer type. This design was introduced by AI21 Labs as Jamba and independently explored by Zyphra as Zamba.
 
 ---
 
@@ -93,13 +84,13 @@ in_proj → split → [Conv1d + SiLU → SSM] × [SiLU gate] → out_proj
 
 `d_inner = n_embd × mamba_expand` (default: 768 when `n_embd=384, expand=2`).
 
-Input-dependent Δ, B, C parameters make the scan selective. Sequential Python loop — same caveats as the Mamba standalone model (see `reports/mamba.md`).
+Input-dependent Δ, B, C parameters make the scan selective. Sequential Python loop — same caveats as the Mamba standalone model (see `reports/08_mamba.md`).
 
 ### CausalSelfAttention (odd layers)
 
 Standard fused QKV causal self-attention from `src.core.attention.CausalSelfAttention` (same as GPT-2). Uses `n_head` full attention heads (`n_head=6` for small). Flash Attention (`F.scaled_dot_product_attention`, `is_causal=True`) is used when PyTorch >= 2.0.
 
-RoPE frequencies are precomputed once at model construction and passed to attention blocks implicitly via the module's internal state (the `freqs_cis` buffer is registered on the top-level `JambaSLM`, not per-block).
+RoPE frequencies are precomputed once at model construction and registered as a non-persistent buffer on the top-level `JambaSLM`.
 
 ### SwiGLU FFN (shared)
 
@@ -139,7 +130,7 @@ For `jamba_small` (`n_embd=384, n_layer=8, n_head=6, mamba_expand=2, intermediat
 Embedding (shared with lm_head):  50257 × 384 ≈ 19.3 M
 
 Per Mamba block (even, 4 blocks):
-  MambaBlock:                                  ≈  926 K   (see mamba.md)
+  MambaBlock:                                  ≈  926 K   (see 08_mamba.md)
   SwiGLU FFN:  2 × 384×1024 + 384×1024        ≈  786 K
   RMSNorms:    2 × 384                         <    1 K
   Subtotal                                     ≈ 1.71 M
@@ -221,9 +212,13 @@ make train    MODEL=jamba_config EXP=my_jamba_run
 make generate MODEL=jamba_config EXP=my_jamba_run
 ```
 
-### Training Specification — How This Model Was Training
+---
 
-**Original state (before fix):** Jamba's 4 even-indexed Mamba layers each ran a Python `for t in range(T=128)` loop. That is **512 sequential CUDA kernel launches** per forward pass from the Mamba layers alone. The 4 attention layers were already fast (single fused kernel). Because only half the layers carry the scan overhead, Jamba was faster than pure Mamba but still slow — **~2.6–3 it/s on A100** vs ~33 it/s for GPT (~13× slower).
+## Training Specification
+
+### Sequential loop vs CUDA fast path
+
+**Original state (before fix):** Jamba's 4 even-indexed Mamba layers each ran a Python `for t in range(T=128)` loop. That is 512 sequential CUDA kernel launches per forward pass from the Mamba layers alone. The 4 attention layers were already fast (single fused kernel). Because only half the layers carry the scan overhead, Jamba was faster than pure Mamba but still slow — **~2.6–3 it/s on A100** vs ~33 it/s for GPT (~13× slower).
 
 **Fix implemented (inherited from Mamba):** Jamba directly reuses `MambaBlock` from `src/core/mamba_block.py`. That block already has the `mamba-ssm` CUDA kernel fast path wired in:
 
@@ -236,8 +231,6 @@ def _ssm(self, x):
 
 No Jamba-specific code change was needed — installing `mamba-ssm` automatically accelerates all 4 Mamba blocks in every Jamba forward pass.
 
-**What to expect after installing `mamba-ssm`:**
-
 | Mode | Throughput (A100) | vs GPT baseline |
 |---|---|---|
 | Sequential Python loop (fallback, no install) | ~2.6–3 it/s | ~13× slower |
@@ -249,10 +242,6 @@ Install once, benefit automatically:
 pip install causal-conv1d mamba-ssm
 # or: pip install -r requirements.txt  (both are listed there)
 ```
-
-### Adjusting the Mamba/Attention ratio
-
-The interleaving is hard-coded as even=Mamba, odd=Attention. To change the ratio, the `HybridBlock` source in `model.py` would need to be modified. An alternative is to change `n_layer`: more layers means more of each type in proportion.
 
 ---
 
@@ -286,22 +275,7 @@ Written to `outputs/jamba/checkpoints/`. Checkpoints contain weights for both Ma
 
 ### Interpreting validation loss
 
-On TinyStories with `jamba_small`, the hybrid architecture typically converges similarly to or slightly better than either the pure-Mamba or pure-attention baseline at the same parameter count. The attention blocks provide anchor points that stabilise training:
-
-| Stage | Approximate val loss |
-|---|---|
-| Random initialisation | ~10.8 |
-| Early training (1 K iters) | 3.0–4.0 |
-| Mid training (10 K iters) | 1.8–2.2 |
-| Converged (20 K iters) | 1.4–1.7 |
-
----
-
-## References
-
-- Lieber et al., 2024 — "Jamba: A Hybrid Transformer-Mamba Language Model" (AI21 Labs)
-- Glorioso et al., 2024 — "Zamba: A Compact 7B SSM Hybrid Model" (Zyphra)
-- Gu & Dao, 2023 — "Mamba: Linear-Time Sequence Modeling with Selective State Spaces"
+JambaSLM achieved a best validation loss of **~2.42** at 20k steps — second-best across all 8 architectures. This confirms the hybrid design hypothesis at this scale: the attention layers provide precise retrieval capability that pure SSMs lack, while the Mamba layers compress context cheaply. The 0.03-nat gap from MiniGPT (2.39) is small; Jamba achieves this with 35M parameters vs ~29M for GPT.
 
 ---
 
@@ -319,3 +293,13 @@ On TinyStories with `jamba_small`, the hybrid architecture typically converges s
 | RoPE utilities | `src/core/rope.py` |
 | Preset configs | `configs/jamba_config/model/jamba_small.yaml`, `jamba_medium.yaml` |
 | Generation loop | `src/core/generation.py` |
+
+---
+
+## References
+
+Lieber et al., 2024 — "Jamba: A Hybrid Transformer-Mamba Language Model." arXiv:2403.19887.
+
+Gu & Dao, 2023 — "Mamba: Linear-Time Sequence Modeling with Selective State Spaces." arXiv:2312.00752.
+
+Glorioso et al., 2024 — "Zamba: A Compact 7B SSM Hybrid Model." arXiv:2405.16712.

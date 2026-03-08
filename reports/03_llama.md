@@ -1,14 +1,10 @@
 # LLaMA — Architecture Reference
 
-This document covers the LLaMA-style model implementation in `src/models/llama/`. It is a reference for understanding the architecture, configuring it, and interpreting training results.
-
-For adding a new model or changing datasets, see `reports/technical_design.md`.
+LlamaSLM is a decoder-only transformer that replaces every GPT-2 design choice with the LLaMA conventions: RMSNorm, Rotary Position Embeddings, Grouped Query Attention, and SwiGLU. This document covers the implementation in `src/models/llama/`, its configuration, and how to interpret training results.
 
 ---
 
 ## Architecture
-
-LlamaSLM is a decoder-only transformer that replaces every GPT-2 design choice with the modern LLaMA conventions: RMSNorm instead of LayerNorm, Rotary Position Embeddings instead of learned position tables, Grouped Query Attention instead of full Multi-Head Attention, and SwiGLU instead of the GELU MLP. There are no bias terms in any Linear layer.
 
 ```
 Input token IDs  (B, T)
@@ -34,7 +30,7 @@ Input token IDs  (B, T)
         Logits  (B, 1, vocab_size)   [generation — last position only]
 ```
 
-### Key innovations vs GPT-2
+### Key differences from GPT-2
 
 | Feature | GPT-2 | LLaMA |
 |---|---|---|
@@ -46,7 +42,7 @@ Input token IDs  (B, T)
 
 ### Weight tying
 
-The token embedding matrix (`wte.weight`) and the LM head projection (`lm_head.weight`) share the same parameter tensor, identical to the GPT-2 convention. Because there is no position embedding table (`wpe`), the parameter saving is larger relative to GPT-2 at the same embedding size.
+The token embedding matrix (`wte.weight`) and the LM head projection (`lm_head.weight`) share the same parameter tensor, identical to GPT-2. Because there is no position embedding table (`wpe`), the parameter saving relative to GPT-2 is larger at the same embedding size.
 
 ### RMSNorm
 
@@ -60,7 +56,7 @@ Applied before both the attention sub-layer and the FFN sub-layer (pre-norm). A 
 
 ### Rotary Position Embeddings (RoPE)
 
-RoPE encodes position by rotating the query and key vectors in pairs of dimensions. The rotation angle for dimension pair `(2i, 2i+1)` at position `t` is `t * theta^(-2i/head_dim)` where `theta = rope_theta` (default 10 000). Crucially, the dot product `q_t · k_s` depends only on the relative offset `t - s`, giving the model translation-invariant position sensitivity without a stored table.
+RoPE encodes position by rotating the query and key vectors in pairs of dimensions. The rotation angle for dimension pair `(2i, 2i+1)` at position `t` is `t * theta^(-2i/head_dim)` where `theta = rope_theta` (default 10 000). The dot product `q_t · k_s` depends only on the relative offset `t - s`, giving the model translation-invariant position sensitivity without a stored table.
 
 The frequencies are precomputed once at model construction and registered as a non-persistent buffer (`freqs_cis`), so they are automatically moved to the correct device without being saved in checkpoints.
 
@@ -86,7 +82,7 @@ SwiGLU replaces the two-matrix GELU MLP with a three-matrix gated FFN:
 SwiGLU(x) = W2( silu(W1(x)) * W3(x) )
 ```
 
-Because the gate doubles the width, `intermediate_size` is set smaller than `4 * n_embd` (e.g. 1024 instead of 1536 for `n_embd=384`) so the total parameter count is comparable.
+Because the gate doubles the width, `intermediate_size` is set smaller than `4 * n_embd` (e.g. 1024 instead of 1536 for `n_embd=384`) so the total parameter count is comparable to GPT-2 at the same scale.
 
 ---
 
@@ -127,7 +123,7 @@ total ≈ vocab_size × n_embd
                   + n_embd² + 2*n_embd*intermediate_size + n_embd)
 ```
 
-For the `llama_small` defaults (`n_embd=384, n_layer=6, n_head=6, n_kv_head=2, intermediate_size=1024`):
+For `llama_small` defaults (`n_embd=384, n_layer=6, n_head=6, n_kv_head=2, intermediate_size=1024`):
 
 ```
 embedding:  50257 × 384 ≈ 19.3 M
@@ -273,16 +269,7 @@ Written to `training.checkpoint_path` (default `outputs/llama/checkpoints/`). Ea
 
 ### Interpreting validation loss
 
-On TinyStories with `llama_small`, expect:
-
-| Stage | Approximate val loss |
-|---|---|
-| Random initialisation | ~10.8 (log 50257) |
-| Early training (1 K iters) | 3.0–4.0 |
-| Mid training (10 K iters) | 1.8–2.2 |
-| Converged (20 K iters) | 1.4–1.7 |
-
-LLaMA-style models often converge slightly faster than GPT-2 at the same parameter count due to RMSNorm's more stable gradient flow.
+LlamaSLM achieved a best validation loss of **2.5479** at 20k steps in the controlled 8-architecture comparison — fourth among all models, within 0.02 nats of Mamba and RetNet. Despite carrying every modern transformer upgrade (RoPE, GQA, SwiGLU, RMSNorm), LLaMA does not outperform the simpler GPT baseline at 128-token context. At this scale, the advantages of RoPE over learned position embeddings and GQA over full MHA are marginal.
 
 ### Generation
 
@@ -309,3 +296,17 @@ python main.py generate \
 | RoPE utilities | `src/core/rope.py` |
 | SwiGLU primitive | `src/core/ffn.py` |
 | Generation loop | `src/core/generation.py` |
+
+---
+
+## References
+
+Touvron et al., 2023 — "LLaMA: Open and Efficient Foundation Language Models." arXiv:2302.13971.
+
+Touvron et al., 2023 — "LLaMA 2: Open Foundation and Fine-Tuned Chat Models." arXiv:2307.09288.
+
+Su et al., 2021 — "RoFormer: Enhanced Transformer with Rotary Position Embedding." arXiv:2104.09864.
+
+Ainslie et al., 2023 — "GQA: Training Generalised Multi-Query Transformer Models from Multi-Head Checkpoints." arXiv:2305.13245.
+
+Shazeer, 2020 — "GLU Variants Improve Transformer." arXiv:2002.05202.

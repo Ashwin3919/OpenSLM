@@ -1,14 +1,10 @@
 # DeepSeek MoE — Architecture Reference
 
-This document covers the DeepSeek-style Mixture-of-Experts model implementation in `src/models/deepseek_moe/`. It is a reference for understanding the architecture, configuring it, and interpreting training results.
-
-For adding a new model or changing datasets, see `reports/technical_design.md`.
+DeepSeekMoESLM is a LLaMA-style decoder-only transformer in which the FFN of deeper layers is replaced by a Mixture-of-Experts layer combining one always-active shared expert with a pool of fine-grained routed experts. The design separates total parameter capacity from per-token compute cost. This document covers the implementation in `src/models/deepseek_moe/`, its configuration, and how to interpret training results.
 
 ---
 
 ## Architecture
-
-DeepSeekMoESLM is a LLaMA-style decoder-only transformer in which the FFN of most blocks is replaced by a Mixture-of-Experts (MoE) layer. A small number of early layers retain a standard dense SwiGLU FFN; MoE is applied to the remaining (typically deeper) layers where token specialisation is most beneficial.
 
 ```
 Input token IDs  (B, T)
@@ -52,11 +48,11 @@ Dense layers use a full-width SwiGLU (`intermediate_size`). MoE layers combine a
 
 ---
 
-## Key Innovations
+## Key Components
 
 ### Shared expert (always active)
 
-Every MoE layer has one expert that processes every token unconditionally, providing a stable gradient path and ensuring baseline computation is always performed regardless of routing decisions. The shared expert output is summed with the weighted routed-expert output:
+Every MoE layer has one expert that processes every token unconditionally, providing a stable gradient path and ensuring baseline computation is always performed regardless of routing decisions:
 
 ```
 output = shared_expert(x) + sum_k( w_k * expert_k(x) )
@@ -66,9 +62,9 @@ output = shared_expert(x) + sum_k( w_k * expert_k(x) )
 
 DeepSeek uses many small experts (e.g. 8 routed experts, `expert_hidden_dim=256`) rather than a few large experts. Each expert covers a finer-grained slice of the representation space. Only `top_k=2` are activated per token, so compute cost grows slowly as `n_routed_experts` increases.
 
-### Top-K router
+### Top-K router formula
 
-The router is a single linear layer `gate: n_embd → n_routed_experts`. Logits are passed through softmax restricted to the top-k entries, giving normalised routing weights for the selected experts.
+The router is a single linear layer `gate: n_embd → n_routed_experts`. Logits are passed through softmax restricted to the top-k entries, giving normalised routing weights for the selected experts:
 
 ```
 logits  = gate(x)                              # (B, T, n_experts)
@@ -107,7 +103,7 @@ The coefficient `router_aux_loss_coef` (default `0.01`) controls how strongly lo
 | `n_kv_head` | `int` | `2` | Number of key/value heads (GQA). Must divide `n_head`. |
 | `n_embd` | `int` | `384` | Embedding / hidden dimension. |
 | `intermediate_size` | `int` | `1024` | SwiGLU hidden dim for dense-layer FFNs. |
-| `n_shared_experts` | `int` | `1` | Shared experts always active in MoE layers (currently 1). |
+| `n_shared_experts` | `int` | `1` | Shared experts always active in MoE layers. |
 | `n_routed_experts` | `int` | `8` | Pool of routed experts per MoE layer. |
 | `top_k` | `int` | `2` | Routed experts selected per token. Must be ≤ `n_routed_experts`. |
 | `expert_hidden_dim` | `int` | `256` | SwiGLU hidden dim per expert (smaller than dense `intermediate_size`). |
@@ -222,14 +218,14 @@ make generate MODEL=deepseek_moe_config EXP=my_moe_run
 
 ### Tuning load balancing
 
-If validation loss is good but generated text is poor (symptoms of collapsed routing):
+If validation loss is acceptable but generated text shows collapsed routing symptoms:
 
 ```yaml
 model:
   router_aux_loss_coef: 0.05   # increase from 0.01 to force more balanced routing
 ```
 
-If auxiliary loss is dominating and language quality suffers, reduce it:
+If auxiliary loss dominates and language quality degrades:
 
 ```yaml
 model:
@@ -268,18 +264,13 @@ Written to `outputs/deepseek_moe/checkpoints/`. Each `.pt` file contains the ful
 
 ### Metrics
 
-`outputs/deepseek_moe/metrics.json` is updated after each evaluation. In addition to `train_loss` and `val_loss`, the reported training loss includes the weighted auxiliary loss. Monitoring both `val_loss` and the routing distribution (via a custom analysis notebook) is recommended.
+`outputs/deepseek_moe/metrics.json` is updated after each evaluation. The reported training loss includes the weighted auxiliary loss. Monitoring both `val_loss` and the routing distribution is recommended.
 
 ### Interpreting validation loss
 
-On TinyStories with `deepseek_moe_small`, the loss trajectory is similar to `llama_small` because the active parameter count is comparable. The MoE advantage appears at larger total parameter budgets where the expert pool adds capacity without proportionally increasing per-token compute.
+DeepSeekMoESLM achieved a best validation loss of **~3.17** at 20k steps — significantly worse than the dense baselines.
 
-| Stage | Approximate val loss |
-|---|---|
-| Random initialisation | ~10.8 (log 50257) |
-| Early training (1 K iters) | 3.0–4.0 |
-| Mid training (10 K iters) | 1.8–2.2 |
-| Converged (20 K iters) | 1.4–1.7 |
+At 30M active parameters and 20k steps, the MoE advantage does not materialise. The expert pool adds total capacity but the router requires additional data to learn effective token specialisation; the training budget is insufficient for that to happen. The load-balancing auxiliary loss adds a competing training signal that may slow language-model convergence. The MoE advantage over dense models typically appears only at larger scales (Fedus et al. 2022 report it at 100B+ scale). This result is consistent with the literature: the router must converge before the expert pool provides benefit, and 20k steps on TinyStories is not sufficient for that.
 
 ---
 
@@ -295,3 +286,13 @@ On TinyStories with `deepseek_moe_small`, the loss trajectory is similar to `lla
 | RoPE utilities | `src/core/rope.py` |
 | SwiGLU primitive | `src/core/ffn.py` |
 | Generation loop | `src/core/generation.py` |
+
+---
+
+## References
+
+Dai et al., 2024 — "DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models." arXiv:2401.06066.
+
+Fedus et al., 2022 — "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity." arXiv:2101.03961.
+
+Shazeer et al., 2017 — "Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer." arXiv:1701.06538.

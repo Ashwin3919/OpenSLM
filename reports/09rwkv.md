@@ -1,14 +1,10 @@
 # RWKV — Architecture Reference
 
-This document covers the RWKV-style model implementation in `src/models/rwkv/`. It is a reference for understanding the architecture, configuring it, and interpreting training results.
-
-For adding a new model or changing datasets, see `reports/technical_design.md`.
+RWKVSLM is a recurrent language model that trains in parallel (like a transformer) but infers in O(1) per step (like an RNN). TimeMix replaces self-attention with a WKV weighted key-value recurrence; ChannelMix replaces the MLP with a squared-ReLU gated FFN. Position information comes entirely from token shift and learned exponential decay. This document covers the implementation in `src/models/rwkv/`, its configuration, and how to interpret training results.
 
 ---
 
 ## Architecture
-
-RWKVSLM is a recurrent language model that trains exactly like a transformer (all positions computed in parallel) but infers like an RNN (O(1) hidden state per step, O(n) total). It replaces self-attention with a WKV weighted key-value recurrence (TimeMix) and replaces the MLP with a token-shifted gated FFN (ChannelMix).
 
 ```
 Input token IDs  (B, T)
@@ -108,9 +104,7 @@ Hidden dimension = `n_embd × ffn_mult` (default 4×).
 
 ### No positional embeddings
 
-RWKV has no `wpe` table and no RoPE. Relative positional context is provided entirely by:
-1. The exponential decay in the WKV recurrence (`w` term)
-2. The token shift in both sub-blocks
+RWKV has no `wpe` table and no RoPE. Relative positional context is provided entirely by the exponential decay in the WKV recurrence (`w` term) and the token shift in both sub-blocks.
 
 ---
 
@@ -187,7 +181,7 @@ model:
   dropout: 0.1
 ```
 
-Twelve layers at 768 dim, matching the GPT-2 small hidden width. Suitable for experiments comparing RWKV quality against transformer baselines.
+Twelve layers at 768 dim, matching the GPT-2 small hidden width.
 
 ---
 
@@ -210,7 +204,11 @@ make train    MODEL=rwkv_config EXP=my_rwkv_run
 make generate MODEL=rwkv_config EXP=my_rwkv_run
 ```
 
-### Training Specification — How This Model Was Training
+---
+
+## Training Specification
+
+### Sequential loop and the TorchScript fix
 
 **Original state (before fix):** The WKV recurrence inside `RWKV_TimeMix._wkv_sequential()` ran a Python `for t in range(T)` loop. With `block_size=128` and `n_layer=8`, every forward pass issued **~1,024 sequential CUDA kernel launches** (8 layers × 128 steps × multiple ops per step), each paying Python interpreter overhead. Result: RWKV trained at **~1.3–1.6 it/s on A100** — roughly **24× slower** than the GPT baseline.
 
@@ -224,9 +222,7 @@ def _wkv_forward(k, v, exp_w, exp_u):
         ...
 ```
 
-TorchScript compiles the loop body to a single fused execution graph, eliminating Python interpreter dispatch on every step. `exp(k)` and `exp(k)*v` are also pre-computed as vectorised ops before the loop rather than inside it. **No external dependencies required — active automatically on any PyTorch ≥ 2.0 installation.**
-
-**What to expect:**
+TorchScript compiles the loop body to a single fused execution graph, eliminating Python interpreter dispatch on every step. `exp(k)` and `exp(k)*v` are also pre-computed as vectorised ops before the loop rather than inside it. No external dependencies required — active automatically on any PyTorch ≥ 2.0 installation.
 
 | Mode | Throughput (A100) | vs GPT baseline |
 |---|---|---|
@@ -234,15 +230,11 @@ TorchScript compiles the loop body to a single fused execution graph, eliminatin
 | `@torch.jit.script` compiled loop | ~5–8 it/s | ~5× slower |
 | **Parallel cumsum scan (applied)** | **~12–18 it/s (estimated)** | **~2–3× slower** |
 
-A custom CUDA WKV kernel (from the official RWKV-LM repo) would give a further ~1.5× speedup on top of this, but requires CUDA kernel compilation and is not needed here.
-
----
-
-### Parallel WKV Scan — Implementation Detail
+### Parallel WKV scan
 
 **File:** `src/models/rwkv/model.py` — function `_wkv_parallel`, dispatched via `RWKV_TimeMix._wkv_fast`.
 
-**Key insight:** The WKV decay `exp_w` is a **learned per-head scalar, constant across time** (not input-dependent). This means the linear recurrence
+**Key insight:** The WKV decay `exp_w` is a learned per-head scalar, constant across time (not input-dependent). This means the linear recurrence
 
 ```
 state[t] = exp_w * state[t-1] + b[t-1]
@@ -267,7 +259,9 @@ out            = (state_a + exp_u*exp_k*v) / den    # output
 
 **Numerical note:** When `time_decay` is pathologically large (> ~4.5 for T=128), `exp_w` underflows to 0 in float32 and the formula produces `0*inf = NaN`. A `nan_to_num(nan=0.0)` guard handles this safely. This regime is unreachable in practice — `time_decay` is initialised as `randn - 5` (alpha ≈ 0.993).
 
-**Tests:** `tests/test_rwkv_wkv_scan.py` — 16 tests covering forward equivalence (T=1 to T=128), strong/weak decay, gradient flow, gradient equivalence, `TimeMix` integration, and full-model smoke tests.
+### Tests
+
+`tests/test_rwkv_wkv_scan.py` — 16 tests covering forward equivalence (T=1 to T=128), strong/weak decay, gradient flow, gradient equivalence, `TimeMix` integration, and full-model smoke tests.
 
 ### Adjusting head count
 
@@ -311,14 +305,7 @@ Written to `outputs/rwkv/checkpoints/`. Checkpoint includes `time_decay` and `ti
 
 ### Interpreting validation loss
 
-On TinyStories with `rwkv_small`, expect a loss trajectory slightly above the GPT-2 baseline early in training; RWKV's WKV recurrence can take longer to establish useful temporal patterns. Final converged loss is competitive:
-
-| Stage | Approximate val loss |
-|---|---|
-| Random initialisation | ~10.8 |
-| Early training (1 K iters) | 3.5–4.5 |
-| Mid training (10 K iters) | 1.9–2.3 |
-| Converged (20 K iters) | 1.5–1.8 |
+RWKVSLM achieved a best validation loss of **~2.50** at 20k steps — third-best across all 8 architectures, and the strongest result among purely attention-free models in this experiment. This is a notable result: an O(1)-inference RNN trained with WKV recurrence matches or outperforms attention-based variants (LLaMA 2.55, RetNet 2.56, Mamba 2.57) at 30M parameters on 128-token context.
 
 ---
 
@@ -332,3 +319,11 @@ On TinyStories with `rwkv_small`, expect a loss trajectory slightly above the GP
 | Preset configs | `configs/rwkv_config/model/rwkv_small.yaml`, `rwkv_medium.yaml` |
 | RMSNorm primitive | `src/core/normalization.py` |
 | Generation loop | `src/core/generation.py` |
+
+---
+
+## References
+
+Peng et al., 2023 — "RWKV: Reinventing RNNs for the Transformer Era." arXiv:2305.13048.
+
+Peng et al., 2024 — "Eagle and Finch: RWKV with Matrix-Valued States and Dynamic Recurrence." arXiv:2404.05892.

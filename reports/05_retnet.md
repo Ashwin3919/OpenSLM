@@ -1,14 +1,10 @@
 # RetNet — Architecture Reference
 
-This document covers the Retentive Network model implementation in `src/models/retnet/`. It is a reference for understanding the architecture, configuring it, and interpreting training results.
-
-For adding a new model or changing datasets, see `reports/technical_design.md`.
+RetNetSLM replaces softmax attention with a retention mechanism — a linear, normalisation-free operation that applies per-head exponential decay masks over past positions. Retention is parallelisable during training and admits an exact O(1)-per-step recurrent formulation at inference. This document covers the implementation in `src/models/retnet/`, its configuration, and how to interpret training results.
 
 ---
 
 ## Architecture
-
-RetNetSLM replaces softmax attention with a **retention mechanism** — a linear, no-softmax operation that uses per-head exponential decay masks. There are no positional embeddings; relative position is encoded directly by the decay mask. Like attention, retention is parallelisable during training. Unlike attention, it can be evaluated in recurrent mode at O(1) per step during inference.
 
 ```
 Input token IDs  (B, T)
@@ -49,7 +45,7 @@ D[h, i, j] = 0                 for i <  j   (future tokens masked)
 
 where `i` is the query position (current token) and `j` is the key position (past token). Position `j=i-0` (current) has weight `gamma_h^0 = 1.0`; position `j=i-1` has weight `gamma_h`; position `j=i-k` has weight `gamma_h^k`, decaying exponentially into the past.
 
-Because `0 < gamma_h < 1`, older positions receive less weight — the model has a natural "forgetting" horizon. There is **no softmax normalisation**.
+Because `0 < gamma_h < 1`, older positions receive less weight — the model has a natural forgetting horizon. There is no softmax normalisation.
 
 ### Retention computation (parallel mode)
 
@@ -93,7 +89,7 @@ Heads with higher gamma attend to longer temporal scales; lower-gamma heads focu
 
 ### GroupNorm on retention output
 
-After the retention-weighted sum, `GroupNorm` with `n_head` groups is applied to the concatenated head output `(B, T, n_embd)`. This normalises each head's contribution independently, improving training stability. It is a convention from the RetNet paper (equivalent to applying LayerNorm per head).
+After the retention-weighted sum, `GroupNorm` with `n_head` groups is applied to the concatenated head output `(B, T, n_embd)`. This normalises each head's contribution independently, improving training stability. It is equivalent to applying LayerNorm per head, as described in the RetNet paper.
 
 ### Three computation modes
 
@@ -107,9 +103,7 @@ RetNet supports three equivalent computation modes (only the parallel mode is im
 
 For generation at inference time, the parallel mode is used (computing on the last token only). A full recurrent inference implementation would maintain a state tensor `h_h ∈ R^(head_dim × head_dim)` per head and update it as `h_t = gamma_h * h_{t-1} + k_t^T v_t`.
 
----
-
-## Key Innovations vs Softmax Attention
+### Key differences from softmax attention
 
 | Property | Softmax Attention | Retention |
 |---|---|---|
@@ -117,7 +111,7 @@ For generation at inference time, the parallel mode is used (computing on the la
 | Positional encoding | Absolute or RoPE | Implicit via decay matrix D |
 | Normalisation | Softmax (per row) | GroupNorm (per head, post-aggregation) |
 | Recurrent form | No | Yes — exact O(1) inference |
-| Training | O(n²) time and memory | O(n²) time but same memory |
+| Training | O(n²) time and memory | O(n²) time, same memory |
 | Long-range decay | No forced decay | Explicit, per-head, monotone |
 
 ---
@@ -273,26 +267,11 @@ Defined in `configs/retnet_config/training/default.yaml`.
 
 ### Checkpoints
 
-Written to `outputs/retnet/checkpoints/`. The gamma values (`self.gammas`) are registered as non-trainable buffers and are included in the checkpoint. They are deterministic from the config so they do not need to be restored, but their presence in the state dict avoids confusion.
+Written to `outputs/retnet/checkpoints/`. The gamma values (`self.gammas`) are registered as non-trainable buffers and are included in the checkpoint. They are deterministic from the config but their presence in the state dict avoids confusion.
 
 ### Interpreting validation loss
 
-On TinyStories with `retnet_small`, RetNet typically converges similarly to the GPT-2 and LLaMA baselines. The lack of softmax means the model must learn to calibrate its own output scale, which can cause slightly higher early-training loss:
-
-| Stage | Approximate val loss |
-|---|---|
-| Random initialisation | ~10.8 |
-| Early training (1 K iters) | 3.2–4.2 |
-| Mid training (10 K iters) | 1.9–2.3 |
-| Converged (20 K iters) | 1.5–1.8 |
-
-The GroupNorm inside the retention layer is important for stable convergence — without it, the unnormalised retention scores can grow or shrink uncontrollably.
-
----
-
-## Reference
-
-Sun et al., 2023 — "Retentive Network: A Successor to Transformer for Large Language Models" (Microsoft Research)
+RetNetSLM achieved a best validation loss of **~2.56** at 20k steps — competitive with Mamba and LLaMA and within 0.02 nats of both. The GroupNorm inside the retention layer is important for stable convergence; without it, the unnormalised retention scores can grow or shrink uncontrollably. Generation quality is heavily fragmented relative to the quantitative ranking, suggesting the retention mechanism struggles to maintain grammatical span at this loss level.
 
 ---
 
@@ -307,3 +286,9 @@ Sun et al., 2023 — "Retentive Network: A Successor to Transformer for Large La
 | RMSNorm primitive | `src/core/normalization.py` |
 | SwiGLU primitive | `src/core/ffn.py` |
 | Generation loop | `src/core/generation.py` |
+
+---
+
+## References
+
+Sun et al., 2023 — "Retentive Network: A Successor to Transformer for Large Language Models." arXiv:2307.08621.

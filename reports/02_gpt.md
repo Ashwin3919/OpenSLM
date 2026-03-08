@@ -1,14 +1,10 @@
 # GPT — Architecture Reference
 
-This document covers the GPT model implementation in `src/models/gpt/`. It is a reference for understanding the architecture, configuring it, and interpreting training results.
-
-For adding a new model or changing datasets, see `reports/technical_design.md`.
+GPT is a decoder-only transformer: a stack of identical blocks, each applying causal self-attention followed by a position-wise MLP. This document covers the implementation in `src/models/gpt/`, its configuration, and how to interpret training results.
 
 ---
 
 ## Architecture
-
-GPT is a decoder-only transformer: a stack of identical blocks, each performing causal self-attention followed by a position-wise MLP. There is no encoder and no cross-attention.
 
 ```
 Input token IDs  (B, T)
@@ -62,11 +58,11 @@ LayerNorm is applied *before* attention and MLP (pre-LN), not after (post-LN). P
 |---|---|---|---|
 | `vocab_size` | `int` | `50257` | Vocabulary size. GPT-2 tokenizer has 50 257 tokens. |
 | `block_size` | `int` | `128` | Maximum context window in tokens. Sequences longer than this are rejected. |
-| `n_layer` | `int` | `6` | Number of transformer blocks stacked. Larger = deeper = more capacity. |
+| `n_layer` | `int` | `6` | Number of transformer blocks stacked. |
 | `n_head` | `int` | `6` | Number of attention heads per block. Must divide `n_embd` evenly. |
-| `n_embd` | `int` | `384` | Embedding / hidden dimension. Affects width of every layer. |
+| `n_embd` | `int` | `384` | Embedding / hidden dimension. |
 | `dropout` | `float` | `0.1` | Dropout probability. Applied after embeddings, inside attention, and after MLP. Set to `0.0` for inference or small runs. |
-| `bias` | `bool` | `True` | Whether to add bias terms to `Linear` and `LayerNorm` layers. Disabling saves a small number of parameters. |
+| `bias` | `bool` | `True` | Whether to add bias terms to `Linear` and `LayerNorm` layers. |
 
 **Constraint**: `n_embd % n_head == 0`. Validation raises `ValueError` if violated.
 
@@ -228,16 +224,16 @@ Written to `training.checkpoint_path` (default `outputs/miniGPT/checkpoints/`). 
 
 ### Interpreting validation loss
 
-On TinyStories with `gpt_small`, expect:
+MiniGPT (gpt_small) achieved a best validation loss of **2.3921** at 20k steps in the controlled 8-architecture comparison — the lowest of all models evaluated. For reference:
 
 | Stage | Approximate val loss |
 |---|---|
 | Random initialisation | ~10.8 (log 50257) |
 | Early training (1 K iters) | 3.0–4.0 |
 | Mid training (10 K iters) | 1.8–2.2 |
-| Converged (20 K iters) | 1.4–1.7 |
+| Converged (20 K iters) | 2.39 (measured) |
 
-Perplexity = `exp(val_loss)`. A loss of 1.5 corresponds to perplexity ≈ 4.5 — the model is effectively choosing from ~4–5 plausible next tokens at each step.
+Perplexity = `exp(val_loss)`. A loss of 2.39 corresponds to perplexity ≈ 10.9.
 
 ### Generation
 
@@ -257,7 +253,7 @@ Key generation parameters (in `InferenceConfig`):
 | `checkpoint_path` | `""` | Path to `.pt` file to load weights from. |
 | `prompt` | `""` | Text prefix to condition on. |
 | `max_new_tokens` | `200` | Tokens to generate beyond the prompt. |
-| `temperature` | `1.0` | Values < 1 sharpen the distribution (more confident); > 1 flatten it (more random). |
+| `temperature` | `1.0` | Values < 1 sharpen the distribution; > 1 flatten it. |
 | `top_k` | `null` | If set, restrict sampling to the top-k highest-probability tokens. |
 
 ---
@@ -272,3 +268,13 @@ Key generation parameters (in `InferenceConfig`):
 | Preset configs | `configs/miniGPT_config/model/gpt_tiny.yaml`, `gpt_small.yaml`, `gpt_medium.yaml` |
 | Framework primitives used | `src/core/attention.py`, `src/core/blocks.py`, `src/core/layers.py` |
 | Generation loop | `src/core/generation.py` |
+
+---
+
+## References
+
+Radford et al., 2019 — "Language Models are Unsupervised Multitask Learners." OpenAI Blog.
+
+Brown et al., 2020 — "Language Models are Few-Shot Learners." arXiv:2005.14165.
+
+Karpathy, 2022 — "nanoGPT." GitHub: karpathy/nanoGPT.
