@@ -14,16 +14,16 @@ All models were evaluated sequentially across 39 evaluation epochs. The primary 
 
 The following table summarizes the convergence metrics, ordered from highest to lowest performing based on Best Validation Loss.
 
-| Model Architecture | Best Validation Loss | Final Training Loss | Evaluation Points | Best Validated Step |
-| :--- | :---: | :---: | :---: | :---: |
-| **MiniGPT** | 2.3921 | 2.3899 | 39 | 19,500 |
-| **Jamba** | 2.4204 | 2.4228 | 39 | 19,500 |
-| **RWKV** | 2.4994 | 2.4992 | 39 | 19,500 |
-| **Llama** | 2.5479 | 2.5467 | 39 | 19,500 |
-| **RetNet** | 2.5606 | 2.5532 | 39 | 19,500 |
-| **Mamba** | 2.5662 | 2.5623 | 39 | 19,000 |
-| **DeepSeek (MoE)** | 3.1681 | 3.1536 | 39 | 19,500 |
-| **BitNet** | 5.5016 | 5.5099 | 39 | 19,500 |
+| Model Architecture | Best Validation Loss | Final Training Loss |
+| :--- | :---: | :---: |
+| **MiniGPT** | 2.3921 | 2.3899 |
+| **Jamba** | 2.4204 | 2.4228 |
+| **RWKV** | 2.4994 | 2.4992 |
+| **Llama** | 2.5479 | 2.5467 |
+| **RetNet** | 2.5606 | 2.5532 |
+| **Mamba** | 2.5662 | 2.5623 |
+| **DeepSeek (MoE)** | 3.1681 | 3.1536 |
+| **BitNet** | 5.5016 | 5.5099 |
 
 **Observations on Convergence:**
 MiniGPT, Jamba, and RWKV represent the uppermost convergence tier, comfortably breaking beneath a 2.5 validation loss. A densely packed middle-tier consisting of Llama, RetNet, and Mamba exhibit near-identical performance ceilings (~2.55). DeepSeek and particularly BitNet demonstrate the challenges of extreme parameter sparsity and extreme quantization, respectively, under restricted step counts.
