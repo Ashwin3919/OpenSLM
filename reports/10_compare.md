@@ -37,7 +37,7 @@ These three converge within 0.02 nats of each other — effectively indistinguis
 
 ### 3.3 DeepSeek MoE (3.17) — sparse routing advantage does not appear at 20k steps
 
-DeepSeek finishes with validation loss 0.75 above the dense baselines. This is a training dynamics issue, not a model quality issue. MoE architectures require the router to learn token specialisation — at 20k steps, the router has not converged. The load-balancing auxiliary loss adds a competing training signal that may have slowed language-model convergence. MoE's computational advantage (higher total capacity at the same per-token cost) typically requires 3–5× more training steps to materialise than a dense model of the same active parameter count (Fedus et al., 2022). This result is consistent with the MoE scaling literature.
+DeepSeek finishes with validation loss 0.75 above the dense baselines. This is a training dynamics issue, not a model quality issue. MoE architectures require the router to learn token specialisation — at 20k steps, the router has not converged. The load-balancing auxiliary loss adds a competing training signal that may have slowed language-model convergence. MoE's computational advantage (higher total capacity at the same per-token cost) typically requires 3–5× more training steps to materialise than a dense model of the same active parameter count (Fedus et al., 2021). This result is consistent with the MoE scaling literature.
 
 ### 3.4 BitNet (5.50) — ternary quantization does not converge at this scale
 
@@ -101,4 +101,4 @@ Ma et al., 2024 — "The Era of 1-bit LLMs." arXiv:2402.17764.
 
 Sun et al., 2023 — "Retentive Network." arXiv:2307.08621.
 
-Fedus et al., 2022 — "Switch Transformers." arXiv:2101.03961.
+Fedus et al., 2021 — "Switch Transformers." arXiv:2101.03961.

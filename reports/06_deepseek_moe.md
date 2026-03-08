@@ -293,6 +293,6 @@ At 30M active parameters and 20k steps, the MoE advantage does not materialise. 
 
 Dai et al., 2024 — "DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models." arXiv:2401.06066.
 
-Fedus et al., 2022 — "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity." arXiv:2101.03961.
+Fedus et al., 2021 — "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity." arXiv:2101.03961.
 
 Shazeer et al., 2017 — "Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer." arXiv:1701.06538.
