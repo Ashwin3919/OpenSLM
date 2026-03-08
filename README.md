@@ -42,7 +42,7 @@ python main.py generate --config configs/miniGPT_config/experiments/exp_001_base
 
 ## Architecture Zoo
 
-8 SLM architectures implemented at the same ~30–50 M parameter scale, trained on TinyStories with identical tokenizer and training budget. See [`reports/architecture_zoo.md`](reports/architecture_zoo.md) for the full comparison plan.
+8 SLM architectures implemented at the same ~30–35 M parameter scale, trained on TinyStories with identical tokenizer and training budget. See [`reports/architecture_zoo.md`](reports/architecture_zoo.md) for the full comparison plan.
 
 | Registry Key | Params (total) | Active | Key Innovation | Report |
 |---|---|---|---|---|
