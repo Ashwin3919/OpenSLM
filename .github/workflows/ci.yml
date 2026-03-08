@@ -28,11 +28,5 @@ jobs:
       - name: Install project dependencies
         run: pip install -e ".[dev]"
 
-      - name: Core tests (no GPU, no network)
-        run: pytest tests/test_core/ tests/test_infra/ -v --timeout=60 --cov=src --cov-report=term-missing --cov-fail-under=60
-
-      - name: Pipeline smoke tests
-        run: pytest tests/test_pipelines/test_training.py -v --timeout=120 --cov=src --cov-append --cov-report=term-missing
-
-      - name: Tuning pipeline tests
-        run: pytest tests/test_tuning.py -v --timeout=60
+      - name: Run tests
+        run: make test
