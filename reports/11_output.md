@@ -37,7 +37,7 @@ All models were evaluated under identical constraints (TinyStories dataset, 20k 
 > Lily wanted to go off toed theep, but away and Hodgapped them. From then on, Jane!" Jack followed Lily a mall. remembered that sometimes, but she didn't always want togirls.
 > Later that day, Mikeched dad eye on bed and pleaded off, and Everywhere she came eating his white dress, the kindrus was treats and it was determined to fly in the stable."
 
-## 8. BitNet 1.58b (Ternary Quantization)
+## 8. BitNet (Ternary Quantization)
 > "Once upon a time pond Mom seriousberries anxious. thing disagreements bird weak flying was a promise game distance.
 > politely respect calling,It the The bikes gave drew nice friendly. angel be smile beautiful down stayed Th, promisedate, days She Mama proud promised even. time want fight and hid lemonn. fun camera had named soldier and down
 > The he a turned wasL. pull look dad must braveredMax park rode and Suddenly They Benny and around. eventually"
