@@ -142,7 +142,7 @@ Per ChannelMix block:
 Per RWKVBlock total:            ≈ 3.41 M
 
 Total:
-  25.7 M + 8 × 0.93 M (TimeMix+ChannelMix without embed overlap) ≈ 33 M
+  25.7 M + 8 × 3.41 M ≈ 53 M
 ```
 
 ---
@@ -151,7 +151,7 @@ Total:
 
 Two ready-to-use model configs are in `configs/rwkv_config/model/`.
 
-### `rwkv_small.yaml` — ~33 M parameters (8 layers, 512 dim)
+### `rwkv_small.yaml` — ~53 M parameters (8 layers, 512 dim)
 
 ```yaml
 model_type: rwkv
@@ -165,7 +165,7 @@ model:
   dropout: 0.0
 ```
 
-Eight layers with 512 embedding dim. The wider embedding (512 vs 384 in GPT small) compensates for RWKV's simpler per-block structure.
+Eight layers with 512 embedding dim. The wider embedding (512 vs 384 in GPT small) means RWKV has a larger parameter count (~53M vs ~30M for other small configs) — the embedding alone accounts for ~25.7M of this.
 
 ### `rwkv_medium.yaml` — ~65 M parameters (12 layers, 768 dim)
 
@@ -305,7 +305,7 @@ Written to `outputs/rwkv/checkpoints/`. Checkpoint includes `time_decay` and `ti
 
 ### Interpreting validation loss
 
-RWKVSLM achieved a best validation loss of **~2.50** at 20k steps — third-best across all 8 architectures, and the strongest result among purely attention-free models in this experiment. This is a notable result: an O(1)-inference RNN trained with WKV recurrence matches or outperforms attention-based variants (LLaMA 2.55, RetNet 2.56, Mamba 2.57) at 30M parameters on 128-token context.
+RWKVSLM achieved a best validation loss of **~2.50** at 20k steps — third-best across all 8 architectures, and the strongest result among purely attention-free models in this experiment. This is a notable result: an O(1)-inference RNN trained with WKV recurrence matches or outperforms attention-based variants (LLaMA 2.55, RetNet 2.56, Mamba 2.57) at 53M parameters on 128-token context. Note that RWKV's wider embedding (n_embd=512) gives it more parameters than the other ~30M models in this comparison.
 
 ---
 

@@ -121,24 +121,24 @@ Embedding (shared with lm_head):
   50257 × 384 ≈ 19.3 M
 
 Per dense layer (layers 0, 1):
-  GQA:     384×(6+4)×64 + 384²  ≈ 390 K
-  SwiGLU:  2 × 384×1024         ≈ 786 K
-  Subtotal per dense layer       ≈ 1.18 M
+  GQA:     384×(6+4)×64 + 384²     ≈ 390 K
+  SwiGLU:  3 × 384×1024             ≈ 1.18 M  (gate + up + down)
+  Subtotal per dense layer           ≈ 1.57 M
 
 Per MoE layer (layers 2–5):
-  GQA:              same         ≈ 390 K
-  Shared expert:   2 × 384×256  ≈ 197 K
-  Routed experts:  8 × 2×384×256 ≈ 1.57 M
-  Router gate:     384×8         ≈   3 K
-  Subtotal per MoE layer         ≈ 2.16 M
+  GQA:              same             ≈ 390 K
+  Shared expert:   3 × 384×256      ≈ 295 K   (gate + up + down)
+  Routed experts:  8 × 3×384×256    ≈ 2.36 M
+  Router gate:     384×8             ≈   3 K
+  Subtotal per MoE layer             ≈ 3.05 M
 
 Total:
-  19.3 M + 2×1.18 M + 4×2.16 M ≈ 30.3 M backbone + MoE pool ≈ 48 M total
+  19.3 M + 2×1.57 M + 4×3.05 M ≈ 34.6 M total
 
 Active per token (dense + shared + top-2 of 8):
   Dense layers:    full FFN active
   MoE layers:     shared + 2 routed experts
-  ≈ 25 M active parameters per token forward pass
+  ≈ 28 M active parameters per token forward pass
 ```
 
 ---
@@ -147,7 +147,7 @@ Active per token (dense + shared + top-2 of 8):
 
 Two ready-to-use model configs are in `configs/deepseek_moe_config/model/`.
 
-### `deepseek_moe_small.yaml` — ~48 M total, ~25 M active
+### `deepseek_moe_small.yaml` — ~35 M total, ~28 M active
 
 ```yaml
 model_type: deepseek_moe
@@ -270,7 +270,7 @@ Written to `outputs/deepseek_moe/checkpoints/`. Each `.pt` file contains the ful
 
 DeepSeekMoESLM achieved a best validation loss of **~3.17** at 20k steps — significantly worse than the dense baselines.
 
-At 30M active parameters and 20k steps, the MoE advantage does not materialise. The expert pool adds total capacity but the router requires additional data to learn effective token specialisation; the training budget is insufficient for that to happen. The load-balancing auxiliary loss adds a competing training signal that may slow language-model convergence. The MoE advantage over dense models typically appears only at larger scales (Fedus et al. 2022 report it at 100B+ scale). This result is consistent with the literature: the router must converge before the expert pool provides benefit, and 20k steps on TinyStories is not sufficient for that.
+At ~28M active parameters (~35M total) and 20k steps, the MoE advantage does not materialise. The expert pool adds total capacity but the router requires additional data to learn effective token specialisation; the training budget is insufficient for that to happen. The load-balancing auxiliary loss adds a competing training signal that may slow language-model convergence. The MoE advantage over dense models typically appears only at larger scales (Fedus et al. 2022 report it at 100B+ scale). This result is consistent with the literature: the router must converge before the expert pool provides benefit, and 20k steps on TinyStories is not sufficient for that.
 
 ---
 

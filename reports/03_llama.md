@@ -127,8 +127,9 @@ For `llama_small` defaults (`n_embd=384, n_layer=6, n_head=6, n_kv_head=2, inter
 
 ```
 embedding:  50257 × 384 ≈ 19.3 M
-per block:  384×(6+4)×64 + 384² + 2×384×1024 ≈ 1.92 M
-total:      19.3 M + 6 × 1.92 M ≈ 31 M
+per block:  384×(6+4)×64 + 384² + 3×384×1024 ≈ 1.57 M
+            (GQA Q+K+V+out)   (SwiGLU gate+up+down)
+total:      19.3 M + 6 × 1.57 M ≈ 29 M
 ```
 
 ---
@@ -137,7 +138,7 @@ total:      19.3 M + 6 × 1.92 M ≈ 31 M
 
 Two ready-to-use model configs are in `configs/llama_config/model/`.
 
-### `llama_small.yaml` — baseline (~31 M parameters)
+### `llama_small.yaml` — baseline (~29 M parameters)
 
 ```yaml
 model_type: llama

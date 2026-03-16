@@ -135,8 +135,7 @@ Embedding (shared with lm_head):
   vocab_size × d_model = 50257 × 384                ≈ 19.3 M
 
 Total:
-  19.3 M + 12 × 0.926 M                             ≈ 30.4 M  (reported ~32 M
-                                                               including all buffers)
+  19.3 M + 12 × 0.926 M                             ≈ 30.4 M
 ```
 
 ---
@@ -145,7 +144,7 @@ Total:
 
 Two ready-to-use model configs are in `configs/mamba_config/model/`.
 
-### `mamba_small.yaml` — ~32 M parameters (12 layers)
+### `mamba_small.yaml` — ~30 M parameters (12 layers)
 
 ```yaml
 model_type: mamba

@@ -1,4 +1,4 @@
-# Controlled Comparison of Eight Small Language Model Architectures at 30M Parameters
+# Controlled Comparison of Eight Small Language Model Architectures (~29–53M Parameters)
 
 ---
 
@@ -10,16 +10,16 @@ Eight architectures were trained on TinyStories (`roneneldan/TinyStories`) using
 
 ## 2. Results
 
-| Architecture | Best Val Loss | Final Train Loss |
-|---|---|---|
-| MiniGPT | 2.3921 | 2.3899 |
-| Jamba | 2.4204 | 2.4228 |
-| RWKV | 2.4994 | 2.4992 |
-| LLaMA | 2.5479 | 2.5467 |
-| RetNet | 2.5606 | 2.5532 |
-| Mamba | 2.5662 | 2.5623 |
-| DeepSeek MoE | 3.1681 | 3.1536 |
-| BitNet | 5.5016 | 5.5099 |
+| Architecture | Parameters | Best Val Loss | Final Train Loss |
+|---|---|---|---|
+| MiniGPT | 30.0M | 2.3921 | 2.3899 |
+| Jamba | 34.8M | 2.4204 | 2.4228 |
+| RWKV | 53.0M | 2.4994 | 2.4992 |
+| LLaMA | 28.7M | 2.5479 | 2.5467 |
+| RetNet | 29.9M | 2.5606 | 2.5532 |
+| Mamba | 30.5M | 2.5662 | 2.5623 |
+| DeepSeek MoE | 34.7M total / ~28M active | 3.1681 | 3.1536 |
+| BitNet | 28.8M | 5.5016 | 5.5099 |
 
 The convergence plot (`experiment_comparison.png`) shows validation loss over 20 000 iterations for all 8 architectures. The curves separate into three tiers: (1) MiniGPT, Jamba, RWKV converge below 2.5; (2) LLaMA, RetNet, Mamba converge tightly in the 2.55–2.57 band; (3) DeepSeek and BitNet remain significantly above 3.0 and 5.0 respectively throughout training. All models show typical loss curves — rapid early descent from ~10 (random initialisation over 50k vocabulary), then flattening as training progresses.
 
@@ -71,11 +71,11 @@ The qualitative generation outputs are consistent with the quantitative ranking:
 
 ## 5. Summary and Takeaways
 
-1. At 30M parameters and 128-token context, vanilla GPT-2 architecture (MiniGPT) achieves the lowest validation loss. Architectural complexity above the GPT baseline offers marginal improvement at best in this regime.
+1. At ~30M parameters and 128-token context, vanilla GPT-2 architecture (MiniGPT) achieves the lowest validation loss. Architectural complexity above the GPT baseline offers marginal improvement at best in this regime.
 
 2. The hybrid SSM-attention design (Jamba) is the closest competitor to GPT, confirming that complementary mixing mechanisms provide benefit even at small scale.
 
-3. Attention-free models (RWKV, Mamba) are competitive with modern attention-based variants (LLaMA) at this parameter count, suggesting the attention vs. no-attention distinction matters less than training dynamics at 30M scale.
+3. Attention-free models (RWKV, Mamba) are competitive with modern attention-based variants (LLaMA) at this scale, suggesting the attention vs. no-attention distinction matters less than training dynamics. Note RWKV uses a wider embedding (n_embd=512, 53M total) than the other models (~29–35M).
 
 4. MoE sparse routing (DeepSeek) requires significantly more training steps than dense architectures to leverage its parameter efficiency. 20k steps is insufficient for the router to converge.
 

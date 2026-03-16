@@ -110,7 +110,7 @@ model:
   bias: true
 ```
 
-**~50–60 M parameters.** Matches the original notebook. Trains on a single consumer GPU (8 GB VRAM) in a few hours on TinyStories.
+**~30 M parameters.** Matches the original notebook. Trains on a single consumer GPU (8 GB VRAM) in a few hours on TinyStories.
 
 ### `gpt_medium.yaml` — GPT-2 small scale
 
