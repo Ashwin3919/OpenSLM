@@ -2,7 +2,7 @@
 
 The dominant paradigm for comparing language model architectures is evaluation at 7B+ parameters, where differences in hardware utilisation and dataset composition confound architectural comparisons. No controlled study consistently benchmarks diverse sequence modelling architectures at 30M parameters — the scale reachable on a single consumer GPU — under a fixed training budget and shared data pipeline. This gap matters: small-scale deployments (edge inference, embedded systems, on-device NLP) require architecture decisions that cannot be extrapolated from 7B-scale results.
 
-This document is the central reference for a controlled experiment benchmarking 8 SLM architectures at 30–50M parameters on TinyStories. All models share the same dataset, tokenizer, training budget, optimizer, and learning rate schedule. The central question is: **when all else is equal — dataset, tokenizer, parameter count, training budget — which architectural innovation actually matters at small scale?** Individual architecture reports are linked at the end. Measured results are in `reports/10_compare.md`.
+This document is the central reference for a controlled experiment benchmarking 8 SLM architectures at 28–53M parameters on TinyStories. All models share the same dataset, tokenizer, training budget, optimizer, and learning rate schedule. The central question is: **when all else is equal — dataset, tokenizer, parameter count, training budget — which architectural innovation actually matters at small scale?** Individual architecture reports are linked at the end. Measured results are in `reports/10_compare.md`.
 
 ---
 
@@ -10,14 +10,14 @@ This document is the central reference for a controlled experiment benchmarking 
 
 | # | Key | Params (total) | Active params | Attention? | Distinguishing mechanism |
 |---|---|---|---|---|---|
-| 1 | `gpt` | ~29 M | 29 M | Full MHA | Vanilla decoder |
-| 2 | `llama` | ~31 M | 31 M | GQA + RoPE | RMSNorm + SwiGLU + GQA |
-| 3 | `deepseek_moe` | ~48 M | ~25 M | GQA + RoPE | Shared + routed MoE experts |
-| 4 | `mamba` | ~32 M | 32 M | None | Selective SSMs |
-| 5 | `rwkv` | ~33 M | 33 M | None | WKV recurrence |
-| 6 | `jamba` | ~35 M | 35 M | Half layers | Hybrid SSM-attention |
-| 7 | `bitnet` | ~30 M | 30 M | GQA + RoPE | Ternary {-1, 0, +1} weights |
-| 8 | `retnet` | ~29 M | 29 M | Retention (no softmax) | Multi-scale exponential decay |
+| 1 | `gpt` | 30.0 M | 30.0 M | Full MHA | Vanilla decoder |
+| 2 | `llama` | 28.7 M | 28.7 M | GQA + RoPE | RMSNorm + SwiGLU + GQA |
+| 3 | `deepseek_moe` | 34.7 M | ~28 M | GQA + RoPE | Shared + routed MoE experts |
+| 4 | `mamba` | 30.4 M | 30.4 M | None | Selective SSMs |
+| 5 | `rwkv` | 53.0 M | 53.0 M | None | WKV recurrence |
+| 6 | `jamba` | 34.8 M | 34.8 M | Half layers | Hybrid SSM-attention |
+| 7 | `bitnet` | 28.8 M | 28.8 M | GQA + RoPE | Ternary {-1, 0, +1} weights |
+| 8 | `retnet` | 29.9 M | 29.9 M | Retention (no softmax) | Multi-scale exponential decay |
 
 ---
 

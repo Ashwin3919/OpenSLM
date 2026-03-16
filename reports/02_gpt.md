@@ -94,7 +94,7 @@ model:
   bias: true
 ```
 
-**~200 K parameters.** Trains in seconds on CPU. Not useful for generation quality — use for checking that code runs end-to-end.
+**~3.3M parameters.** Trains in seconds on CPU. Not useful for generation quality — use for checking that code runs end-to-end.
 
 ### `gpt_small.yaml` — baseline
 
@@ -126,7 +126,7 @@ model:
   bias: true
 ```
 
-**~125 M parameters** (comparable to GPT-2 small). Requires ~20 GB GPU memory for training at the default batch size.
+**~123.8M parameters** (comparable to GPT-2 small). Requires ~20 GB GPU memory for training at the default batch size.
 
 ---
 

@@ -130,7 +130,7 @@ Storage:     ~60 MB at float16      /  ~6 MB at 1.58-bit packed
 
 Two ready-to-use model configs are in `configs/bitnet_config/model/`.
 
-### `bitnet_small.yaml` — ~30 M parameters (~6 MB packed)
+### `bitnet_small.yaml` — ~28.8M parameters (~5.5 MB packed)
 
 ```yaml
 model_type: bitnet
