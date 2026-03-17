@@ -6,6 +6,9 @@ LlamaSLM is a decoder-only transformer that replaces every GPT-2 design choice w
 
 ## Architecture
 
+![LLaMA Architecture Diagram](Arc_diagram/plots/llama_architecture.png)
+
+<!--
 ```
 Input token IDs  (B, T)
         │
@@ -29,6 +32,12 @@ Input token IDs  (B, T)
         Logits  (B, T, vocab_size)   [training]
         Logits  (B, 1, vocab_size)   [generation — last position only]
 ```
+-->
+
+**Diagram Explanation:**
+* **RMSNorm:** A simplified alternative to LayerNorm that scales variance without mean-centering, which is faster and computationally cheaper.
+* **GQAttention (Grouped Query Attention):** Instead of standard Multi-Head Attention, GQA shares Key/Value pairs across groups of queries to significantly reduce memory cost during inference. It uses Rotary Position Embeddings (RoPE) inside to inject positional awareness.
+* **SwiGLU FFN:** A highly expressive Swish-Gated Linear Unit feed-forward network containing three weight matrices instead of the usual two in GPT's MLP.
 
 ### Key differences from GPT-2
 

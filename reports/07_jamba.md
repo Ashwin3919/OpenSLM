@@ -6,6 +6,9 @@ JambaSLM interleaves Mamba SSM blocks (even layers) with causal self-attention b
 
 ## Architecture
 
+![Jamba Architecture Diagram](Arc_diagram/plots/jamba_architecture.png)
+
+<!--
 ```
 Input token IDs  (B, T)
         │
@@ -32,6 +35,13 @@ Input token IDs  (B, T)
         Logits  (B, T, vocab_size)   [training]
         Logits  (B, 1, vocab_size)   [generation]
 ```
+-->
+
+**Diagram Explanation:**
+* **Hybrid Interleaving:** The architecture rapidly switches between SSM (even layers) and Attention (odd layers).
+* **MambaBlock (SSM):** Compresses historical context effectively with linear O(n) scaling, efficiently expanding the context window.
+* **CausalSelfAttention:** Provides exact retrieval and precise token lookup, compensating for the lossy memory of the SSM blocks.
+* **SwiGLU FFN:** A shared feed-forward structure providing common pointwise capacity irrespective of which sequence routing preceded it.
 
 ### Layer assignment
 

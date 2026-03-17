@@ -6,6 +6,9 @@ RetNetSLM replaces softmax attention with a retention mechanism — a linear, no
 
 ## Architecture
 
+![RetNet Architecture Diagram](Arc_diagram/plots/retnet_architecture.png)
+
+<!--
 ```
 Input token IDs  (B, T)
         │
@@ -29,6 +32,11 @@ Input token IDs  (B, T)
         Logits  (B, T, vocab_size)   [training — parallel mode]
         Logits  (B, 1, vocab_size)   [generation]
 ```
+-->
+
+**Diagram Explanation:**
+* **MultiScaleRetention:** Replaces softmax self-attention. It assigns exponentially decaying weights to past tokens. Different heads use different decay rates (some short-range, some long-range). It operates linearly without softmax, enabling parallel training and fast recurrent inference.
+* **Absence of Position Embeddings:** The exponential decay naturally provides relative positional distance, removing the need for explicit positional tables.
 
 ---
 

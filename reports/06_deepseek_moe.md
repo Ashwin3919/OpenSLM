@@ -6,6 +6,9 @@ DeepSeekMoESLM is a LLaMA-style decoder-only transformer in which the FFN of dee
 
 ## Architecture
 
+![DeepSeek-MoE Architecture Diagram](Arc_diagram/plots/deepseek_architecture.png)
+
+<!--
 ```
 Input token IDs  (B, T)
         │
@@ -34,6 +37,12 @@ Input token IDs  (B, T)
         Logits  (B, T, vocab_size)   [training — includes aux loss]
         Logits  (B, 1, vocab_size)   [generation]
 ```
+-->
+
+**Diagram Explanation:**
+* **Dense vs. MoE layer branching:** The model starts with standard dense SwiGLU layers to build baseline features, then transitions deeper into Mixture of Experts (MoE) layers.
+* **SharedExpert:** One specialized feed-forward network that processes every single token, guaranteeing baseline foundational compute.
+* **RoutedExperts:** Finer-grained, specialized networks. A token-specific router dynamically activates only the top-K experts per token, vastly expanding model capacity without linearly increasing inference cost.
 
 ### Dense vs MoE layer assignment
 

@@ -6,6 +6,9 @@ GPT is a decoder-only transformer: a stack of identical blocks, each applying ca
 
 ## Architecture
 
+![GPT Architecture Diagram](Arc_diagram/plots/gpt_architecture.png)
+
+<!--
 ```
 Input token IDs  (B, T)
         │
@@ -30,6 +33,14 @@ Input token IDs  (B, T)
         Logits  (B, T, vocab_size)   [training]
         Logits  (B, 1, vocab_size)   [generation — last position only]
 ```
+-->
+
+**Diagram Explanation:**
+* **wte & wpe:** The token embeddings (wte) map token IDs to vectors, and the position embeddings (wpe) add learned positional information so the model knows the order of tokens.
+* **TransformerBlock:** The core repeating unit. It contains:
+  * **CausalSelfAttention:** Allows tokens to gather context from preceding tokens in the sequence (cannot see the future).
+  * **MLP:** A Multi-Layer Perceptron that projects features into a wider space (4x expansion) for deeper representation and then back down.
+* **lm_head:** The final classification layer predicting the next token probabilities. It shares weights with the token embedding to save parameters.
 
 ### Weight tying
 

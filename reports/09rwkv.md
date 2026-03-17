@@ -6,6 +6,9 @@ RWKVSLM is a recurrent language model that trains in parallel (like a transforme
 
 ## Architecture
 
+![RWKV Architecture Diagram](Arc_diagram/plots/rwkv_architecture.png)
+
+<!--
 ```
 Input token IDs  (B, T)
         │
@@ -29,6 +32,12 @@ Input token IDs  (B, T)
         Logits  (B, T, vocab_size)   [training]
         Logits  (B, 1, vocab_size)   [generation]
 ```
+-->
+
+**Diagram Explanation:**
+* **TimeMix (WKV module):** Handles token mixing across time instead of attention. Evaluates a recurrently updated, decaying weighted key-value representation.
+* **ChannelMix (sq-ReLU module):** Operates on the feature dimension across individual tokens. Employs a squared-ReLU activation instead of standard gating.
+* **Token shift:** A right-shift mechanism continuously blends the current token embedding with the previous step, functioning as a lightweight positional context natively wired into both TimeMix and ChannelMix.
 
 ### RWKVBlock internal structure
 

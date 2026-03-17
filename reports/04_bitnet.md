@@ -6,6 +6,9 @@ BitNetSLM is structurally identical to LLaMA but replaces every linear projectio
 
 ## Architecture
 
+![BitNet Architecture Diagram](Arc_diagram/plots/bitnet_architecture.png)
+
+<!--
 ```
 Input token IDs  (B, T)
         │
@@ -29,6 +32,11 @@ Input token IDs  (B, T)
         Logits  (B, T, vocab_size)   [training]
         Logits  (B, 1, vocab_size)   [generation]
 ```
+-->
+
+**Diagram Explanation:**
+* **BitLinear:** Replaces standard `Linear` layers in Attention and FFN. In the forward pass, it quantizes inputs to 8-bit integers and weights to ternary values ({-1, 0, +1}). This is optimized for efficient accumulation instead of floating-point multiplication.
+* **Full Precision Boundaries:** The token embeddings (`wte`), RMSNorm layers, and the output `lm_head` remain in high precision (fp32/fp16) to preserve modeling fidelity in critical boundaries.
 
 ---
 

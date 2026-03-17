@@ -6,6 +6,9 @@ MambaSLM replaces self-attention entirely with selective state space (SSM) block
 
 ## Architecture
 
+![Mamba Architecture Diagram](Arc_diagram/plots/mamba_architecture.png)
+
+<!--
 ```
 Input token IDs  (B, T)
         │
@@ -28,6 +31,12 @@ Input token IDs  (B, T)
         Logits  (B, T, vocab_size)   [training]
         Logits  (B, 1, vocab_size)   [generation]
 ```
+-->
+
+**Diagram Explanation:**
+* **MambaLayer:** Utterly discards traditional self-attention. Instead, the sequence is modeled continuously.
+* **MambaBlock (SSM with gating):** Uses selective state-space models. Through input-dependent matrices (B, C, and Δ), the model actively decides what context to remember and what to discard, resolving the static limitations of older SSMs. A built-in depthwise Conv1d assists with immediate local context.
+* **Constant memory:** Inference cache size is fixed O(1) in space, and scales linearly O(n) in time.
 
 ### MambaBlock internal structure
 
