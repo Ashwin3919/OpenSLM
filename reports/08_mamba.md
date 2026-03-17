@@ -133,7 +133,7 @@ Per MambaBlock:
   in_proj:  d_model × 2*d_inner       = 384 × 1536   = 589 K
   conv1d:   d_inner × d_conv          = 768 × 4      =   3 K
   x_proj:   d_inner × (2*d_state + 1) = 768 × 33     =  25 K
-  dt_proj:  1 × d_inner               = 1 × 768      =   1 K
+  dt_proj:  1 × d_inner + bias         = 1 × 768 + 768 ≈   2 K
   A_log:    d_inner × d_state         = 768 × 16     =  12 K
   D skip:   d_inner                   = 768           =   1 K
   out_proj: d_inner × d_model         = 768 × 384    = 295 K

@@ -237,8 +237,8 @@ Defined in `configs/bitnet_config/training/default.yaml`.
 | `checkpoint_path` | `outputs/bitnet/checkpoints/` | Checkpoint directory. |
 | `optimizer.learning_rate` | `3e-4` | Peak learning rate. |
 | `optimizer.betas` | `[0.9, 0.95]` | AdamW momentum coefficients. |
-| `optimizer.weight_decay` | `0.1` | L2 regularisation. |
-| `scheduler.warmup_steps` | `1000` | Linear LR warmup steps. |
+| `optimizer.weight_decay` | `0.0` | L2 regularisation (disabled — ternary weights are already implicitly regularised by quantization). |
+| `scheduler.warmup_steps` | `2000` | Linear LR warmup steps (2× the baseline to improve STE gradient flow at start of training). |
 | `scheduler.min_lr` | `3e-5` | Minimum LR after cosine decay. |
 
 ---

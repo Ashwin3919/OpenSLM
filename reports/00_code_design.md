@@ -250,8 +250,10 @@ Primitives in `src/core/` are shared across architectures to enforce consistency
 
 | Primitive | File | Used by |
 |---|---|---|
+| `LayerNorm` | `src/core/layers.py` | GPT |
+| `MLP` | `src/core/layers.py` | GPT |
 | `RMSNorm` | `src/core/normalization.py` | LLaMA, MoE, Mamba, RWKV, Jamba, BitNet, RetNet |
-| `precompute_freqs_cis`, `apply_rotary_emb` | `src/core/rope.py` | LLaMA, MoE, Jamba, BitNet |
+| `precompute_freqs_cis`, `apply_rotary_emb` | `src/core/rope.py` | LLaMA, MoE, BitNet |
 | `SwiGLU` | `src/core/ffn.py` | LLaMA, MoE, Jamba, RetNet |
 | `MambaBlock` | `src/core/mamba_block.py` | Mamba, Jamba |
 | `CausalSelfAttention` | `src/core/attention.py` | GPT, Jamba |

@@ -30,11 +30,17 @@ This document is the central reference for a controlled experiment benchmarking 
 | Context length | 128 tokens |
 | Training iterations | 20 000 |
 | Batch size | 32 (micro) × 32 (grad accum) = 1 024 effective |
-| Optimizer | AdamW, lr = 3e-4, β = (0.9, 0.95), wd = 0.1 |
+| Optimizer | AdamW, lr = 3e-4, β = (0.9, 0.95), wd = 0.1 (baseline; see exceptions below) |
 | LR schedule | Linear warmup (1 000 steps) → cosine decay to 3e-5 |
 | Gradient clipping | 1.0 |
 | Evaluation interval | Every 500 iterations |
 | Random seed | 42 |
+
+**Exceptions to shared protocol:**
+- **MiniGPT**: lr = 1e-4, min_lr = 5e-4, max_grad_norm = 0.5, eps = 1e-9 (original nanoGPT notebook settings preserved).
+- **RWKV**: β = (0.9, 0.99), wd = 0.01 (RWKV-specific optimizer tuning).
+- **BitNet**: wd = 0.0, warmup_steps = 2000 (adjusted for ternary weight training dynamics).
+- **DeepSeek MoE**: batch_size = 16, gradient_accumulation_steps = 64 (same effective batch of 1 024; micro-batch halved to reduce memory from expert activations).
 
 ---
 
@@ -55,7 +61,7 @@ This document is the central reference for a controlled experiment benchmarking 
 | Module | File | Used by |
 |---|---|---|
 | `RMSNorm` | `src/core/normalization.py` | LLaMA, MoE, Mamba, RWKV, Jamba, BitNet, RetNet |
-| `precompute_freqs_cis`, `apply_rotary_emb` | `src/core/rope.py` | LLaMA, MoE, Jamba, BitNet |
+| `precompute_freqs_cis`, `apply_rotary_emb` | `src/core/rope.py` | LLaMA, MoE, BitNet |
 | `SwiGLU` | `src/core/ffn.py` | LLaMA, MoE, Jamba, RetNet |
 | `MambaBlock` | `src/core/mamba_block.py` | Mamba, Jamba |
 

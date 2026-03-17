@@ -12,4 +12,3 @@ model:
   mamba_expand: 2
   intermediate_size: 1024
   dropout: 0.0
-  rope_theta: 10000.0

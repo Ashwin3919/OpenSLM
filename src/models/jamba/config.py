@@ -18,7 +18,6 @@ class JambaConfig:
         mamba_expand: Inner dimension expansion factor for Mamba blocks.
         intermediate_size: Hidden dim of the SwiGLU FFN shared by all blocks.
         dropout: Dropout probability.
-        rope_theta: Base frequency for RoPE (used in attention blocks).
     """
 
     vocab_size: int = 50257
@@ -31,4 +30,3 @@ class JambaConfig:
     mamba_expand: int = 2
     intermediate_size: int = 1024
     dropout: float = 0.0
-    rope_theta: float = 10_000.0

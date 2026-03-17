@@ -24,7 +24,7 @@ from .config import JambaConfig
 
 
 class _JambaAttention(nn.Module):
-    """Thin wrapper around CausalSelfAttention supplying RoPE.
+    """Thin wrapper around CausalSelfAttention for use inside HybridBlock.
 
     ``CausalSelfAttention`` was written for GPTConfig but only reads
     ``n_embd``, ``n_head``, ``dropout``, and ``bias`` — so we expose those.

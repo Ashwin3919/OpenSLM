@@ -1,4 +1,4 @@
-# 6-layer / 6-head / 384-dim GPT — ~50-60M parameters
+# 6-layer / 6-head / 384-dim GPT — ~30 M parameters
 # Matches the original notebook exactly.
 model_type: gpt
 model:

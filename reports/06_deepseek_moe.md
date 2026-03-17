@@ -250,9 +250,9 @@ Defined in `configs/deepseek_moe_config/training/default.yaml`.
 | Field | Default | Description |
 |---|---|---|
 | `max_iters` | `20000` | Total optimiser steps. |
-| `batch_size` | `32` | Sequences per micro-batch. |
+| `batch_size` | `16` | Sequences per micro-batch (halved vs other models to reduce GPU memory pressure from expert activations). |
 | `block_size` | `128` | Context window — must match `model.block_size`. |
-| `gradient_accumulation_steps` | `32` | Micro-batches before each weight update. |
+| `gradient_accumulation_steps` | `64` | Micro-batches before each weight update (doubled to keep effective batch = 16 × 64 = 1 024). |
 | `max_grad_norm` | `1.0` | Gradient clipping threshold. |
 | `eval_interval` | `500` | Evaluation frequency in iterations. |
 | `eval_batches` | `500` | Validation batches averaged per evaluation. |

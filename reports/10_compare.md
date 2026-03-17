@@ -4,7 +4,7 @@
 
 ## 1. Experimental Setup
 
-Eight architectures were trained on TinyStories (`roneneldan/TinyStories`) using the GPT-2 tiktoken tokenizer (vocab = 50 257), a context length of 128 tokens, and a fixed training budget of 20 000 steps with an effective batch size of 1 024 (32 micro-batch × 32 gradient accumulation). All models used AdamW (lr = 3e-4, β = (0.9, 0.95), wd = 0.1) with a 1 000-step linear warmup followed by cosine decay to 3e-5, and gradient clipping at 1.0. The goal was not to reproduce the best published result for each architecture — it was to compare learning ability under a controlled budget. All hyperparameters were set to a single shared baseline; no per-architecture tuning was performed.
+Eight architectures were trained on TinyStories (`roneneldan/TinyStories`) using the GPT-2 tiktoken tokenizer (vocab = 50 257), a context length of 128 tokens, and a fixed training budget of 20 000 steps with an effective batch size of 1 024 (32 micro-batch × 32 gradient accumulation). Most architectures used AdamW (lr = 3e-4, β = (0.9, 0.95), wd = 0.1) with a 1 000-step linear warmup followed by cosine decay to 3e-5, and gradient clipping at 1.0. The following per-architecture deviations were applied: **MiniGPT** used its original nanoGPT notebook settings (lr = 1e-4, min_lr = 5e-4, clip = 0.5, eps = 1e-9). **RWKV** used β = (0.9, 0.99) and wd = 0.01. **BitNet** used wd = 0.0 and warmup = 2 000 steps. **DeepSeek MoE** used micro-batch = 16 with gradient accumulation = 64 (effective batch 1 024 unchanged). The goal was not to reproduce the best published result for each architecture — it was to compare learning ability under a controlled budget.
 
 ---
 

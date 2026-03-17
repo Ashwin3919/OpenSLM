@@ -299,8 +299,8 @@ Defined in `configs/rwkv_config/training/default.yaml`.
 | `eval_batches` | `500` | Validation batches per evaluation. |
 | `checkpoint_path` | `outputs/rwkv/checkpoints/` | Checkpoint directory. |
 | `optimizer.learning_rate` | `3e-4` | Peak learning rate. |
-| `optimizer.betas` | `[0.9, 0.95]` | AdamW momentum coefficients. |
-| `optimizer.weight_decay` | `0.1` | L2 regularisation. |
+| `optimizer.betas` | `[0.9, 0.99]` | AdamW momentum coefficients. |
+| `optimizer.weight_decay` | `0.01` | L2 regularisation. |
 | `scheduler.warmup_steps` | `1000` | Linear LR warmup steps. |
 | `scheduler.min_lr` | `3e-5` | Minimum LR after cosine decay. |
 

@@ -100,7 +100,7 @@ Input-dependent Δ, B, C parameters make the scan selective. Sequential Python l
 
 Standard fused QKV causal self-attention from `src.core.attention.CausalSelfAttention` (same as GPT-2). Uses `n_head` full attention heads (`n_head=6` for small). Flash Attention (`F.scaled_dot_product_attention`, `is_causal=True`) is used when PyTorch >= 2.0.
 
-RoPE frequencies are precomputed once at model construction and registered as a non-persistent buffer on the top-level `JambaSLM`.
+No RoPE is applied — the attention blocks use learned-position-free causal attention, relying on the interleaved Mamba layers for implicit positional context.
 
 ### SwiGLU FFN (shared)
 
@@ -130,7 +130,6 @@ with `intermediate_size` hidden units.
 | `mamba_expand` | `int` | `2` | Inner dimension expansion factor for Mamba blocks (`d_inner = n_embd × expand`). |
 | `intermediate_size` | `int` | `1024` | SwiGLU hidden dimension shared by all blocks. |
 | `dropout` | `float` | `0.0` | Dropout probability. |
-| `rope_theta` | `float` | `10000.0` | RoPE base frequency for attention blocks. |
 
 ### Parameter count (approximate)
 
@@ -176,7 +175,6 @@ model:
   mamba_expand: 2
   intermediate_size: 1024
   dropout: 0.0
-  rope_theta: 10000.0
 ```
 
 Four Mamba blocks (L0, L2, L4, L6) and four attention blocks (L1, L3, L5, L7).
@@ -196,7 +194,6 @@ model:
   mamba_expand: 2
   intermediate_size: 1536
   dropout: 0.1
-  rope_theta: 10000.0
 ```
 
 Six Mamba blocks and six attention blocks at wider dimensions.

@@ -49,14 +49,14 @@ python main.py generate --config configs/miniGPT_config/experiments/exp_001_base
 
 | Registry Key | Params (total) | Active | Key Innovation | Report |
 |---|---|---|---|---|
-| `gpt` | ~29 M | 29 M | Vanilla transformer baseline | [02_gpt.md](reports/02_gpt.md) |
-| `llama` | ~31 M | 31 M | RMSNorm + RoPE + GQA + SwiGLU | [03_llama.md](reports/03_llama.md) |
-| `deepseek_moe` | ~48 M | ~25 M | Shared + routed MoE experts | [06_deepseek_moe.md](reports/06_deepseek_moe.md) |
-| `mamba` | ~32 M | 32 M | Selective SSM, no attention | [08_mamba.md](reports/08_mamba.md) |
-| `rwkv` | ~33 M | 33 M | WKV recurrence, O(1) inference | [09rwkv.md](reports/09rwkv.md) |
-| `jamba` | ~35 M | 35 M | Hybrid Mamba + Attention | [07_jamba.md](reports/07_jamba.md) |
-| `bitnet` | ~30 M | 30 M | Ternary weights {-1, 0, +1} | [04_bitnet.md](reports/04_bitnet.md) |
-| `retnet` | ~29 M | 29 M | Multi-scale decay, no softmax | [05_retnet.md](reports/05_retnet.md) |
+| `gpt` | 30.0 M | 30.0 M | Vanilla transformer baseline | [02_gpt.md](reports/02_gpt.md) |
+| `llama` | 28.7 M | 28.7 M | RMSNorm + RoPE + GQA + SwiGLU | [03_llama.md](reports/03_llama.md) |
+| `deepseek_moe` | 34.7 M | ~28 M | Shared + routed MoE experts | [06_deepseek_moe.md](reports/06_deepseek_moe.md) |
+| `mamba` | 30.4 M | 30.4 M | Selective SSM, no attention | [08_mamba.md](reports/08_mamba.md) |
+| `rwkv` | 53.0 M | 53.0 M | WKV recurrence, O(1) inference | [09rwkv.md](reports/09rwkv.md) |
+| `jamba` | 34.8 M | 34.8 M | Hybrid Mamba + Attention | [07_jamba.md](reports/07_jamba.md) |
+| `bitnet` | 28.8 M | 28.8 M | Ternary weights {-1, 0, +1} | [04_bitnet.md](reports/04_bitnet.md) |
+| `retnet` | 29.9 M | 29.9 M | Multi-scale decay, no softmax | [05_retnet.md](reports/05_retnet.md) |
 
 ### Training any architecture
 
