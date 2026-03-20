@@ -1,4 +1,4 @@
-# DeepSeek-MoE SLM — ~48 M total, ~25 M active params per token
+# DeepSeek-MoE SLM — ~34.7 M total, ~27.6 M active params per token
 # 6 layers: layers 0,1 dense; layers 2-5 MoE (1 shared + 8 routed, top-2)
 model_type: deepseek_moe
 model:

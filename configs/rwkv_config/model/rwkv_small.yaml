@@ -1,5 +1,8 @@
-# RWKV SLM — ~33 M parameters (linear attention RNN)
+# RWKV SLM — ~53 M parameters (linear attention RNN)
 # 8 layers, 512 dim, 8 heads, no positional embeddings
+# Note: n_embd=512 (vs 384 for other models) is required to reach ~30M active params
+# because the large embedding table (50257×512 ≈ 25.7M) dominates the count.
+# At 384-dim the model would be ~20M — too small. 53M total but architecture is valid.
 model_type: rwkv
 model:
   vocab_size: 50257

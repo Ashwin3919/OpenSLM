@@ -4,7 +4,13 @@
 
 ## 1. Experimental Setup
 
-Eight architectures were trained on TinyStories (`roneneldan/TinyStories`) using the GPT-2 tiktoken tokenizer (vocab = 50 257), a context length of 128 tokens, and a fixed training budget of 20 000 steps with an effective batch size of 1 024 (32 micro-batch × 32 gradient accumulation). Most architectures used AdamW (lr = 3e-4, β = (0.9, 0.95), wd = 0.1) with a 1 000-step linear warmup followed by cosine decay to 3e-5, and gradient clipping at 1.0. The following per-architecture deviations were applied: **MiniGPT** used its original nanoGPT notebook settings (lr = 1e-4, min_lr = 5e-4, clip = 0.5, eps = 1e-9). **RWKV** used β = (0.9, 0.99) and wd = 0.01. **BitNet** used wd = 0.0 and warmup = 2 000 steps. **DeepSeek MoE** used micro-batch = 16 with gradient accumulation = 64 (effective batch 1 024 unchanged). The goal was not to reproduce the best published result for each architecture — it was to compare learning ability under a controlled budget.
+Eight architectures were trained on TinyStories (`roneneldan/TinyStories`) using the GPT-2 tiktoken tokenizer (vocab = 50 257), a context length of 128 tokens, and a fixed training budget of 20 000 steps with an effective batch size of 1 024 (32 micro-batch × 32 gradient accumulation). All architectures used AdamW (lr = 3e-4, β = (0.9, 0.95), wd = 0.1) with a 1 000-step linear warmup followed by cosine decay to 3e-5, and gradient clipping at 1.0. Three architecturally-motivated deviations were applied where the shared settings are physically incompatible with the model design:
+
+- **BitNet**: `weight_decay = 0.0` (L2 decay pushes latent weights toward zero, which the ternary quantizer rounds to 0 permanently — dead neurons that cannot recover); `warmup_steps = 2000` (STE gradients are noisy until latent weights reach meaningful magnitudes; 2× warmup reduces early instability).
+- **RWKV**: `β₂ = 0.99` (the WKV time-decay parameters require smoother gradient estimates than β₂ = 0.95 provides; 0.99 matches all official RWKV training configurations); `weight_decay = 0.01` (strong L2 decay collapses the time-mix scalars to zero, destroying the model's ability to learn per-channel temporal dynamics).
+- **DeepSeek MoE**: `batch_size = 16`, `gradient_accumulation = 64` (memory constraint — MoE instantiates all 8 expert activations before routing discards 6; halving the micro-batch and doubling accumulation preserves the same 1 024-token effective batch while fitting on GPU).
+
+The goal was not to reproduce the best published result for each architecture — it was to compare learning ability under a controlled budget with only the minimum necessary per-architecture adaptations.
 
 ---
 

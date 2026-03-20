@@ -262,7 +262,7 @@ class DeepSeekBlock(nn.Module):
 
 
 class DeepSeekMoESLM(BaseSLM):
-    """DeepSeek-style MoE small language model (~48 M total, ~25 M active).
+    """DeepSeek-style MoE small language model (~34.7 M total, ~27.6 M active).
 
     Architecture:
         token embedding → N × DeepSeekBlock → RMSNorm → lm_head.

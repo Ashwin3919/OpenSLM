@@ -197,17 +197,17 @@ Defined in `configs/miniGPT_config/training/default.yaml`, deserialized into `Tr
 | `batch_size` | `32` | Sequences per micro-batch. |
 | `block_size` | `128` | Context window fed to the data loader — must match `model.block_size`. |
 | `gradient_accumulation_steps` | `32` | Micro-batches accumulated before each weight update. Effective batch = `batch_size × gradient_accumulation_steps`. |
-| `max_grad_norm` | `0.5` | Gradient clipping threshold. |
+| `max_grad_norm` | `1.0` | Gradient clipping threshold. |
 | `eval_interval` | `500` | Evaluate on validation set every N iterations. |
 | `eval_batches` | `500` | Number of validation batches averaged per evaluation. |
 | `checkpoint_path` | `outputs/miniGPT/checkpoints/` | Directory for `.pt` checkpoint files. |
 | `resume_from` | `null` | Path to a checkpoint to resume from. |
-| `optimizer.learning_rate` | `1e-4` | Peak learning rate (after warmup). |
+| `optimizer.learning_rate` | `3e-4` | Peak learning rate (after warmup). |
 | `optimizer.betas` | `[0.9, 0.95]` | AdamW momentum coefficients. |
 | `optimizer.weight_decay` | `0.1` | L2 regularisation. |
-| `optimizer.eps` | `1e-9` | AdamW numerical stability epsilon. |
+| `optimizer.eps` | `1e-8` | AdamW numerical stability epsilon. |
 | `scheduler.warmup_steps` | `1000` | Linear LR warmup steps. |
-| `scheduler.min_lr` | `5e-4` | Minimum LR at end of cosine decay. |
+| `scheduler.min_lr` | `3e-5` | Minimum LR at end of cosine decay. |
 
 ---
 

@@ -1,5 +1,5 @@
 # Experiment 001 — baseline
-# Reproduces the original notebook exactly.
+# Standard 30M GPT trained on the same budget and hyperparameters as all other models.
 # Run: make train MODEL=miniGPT_config
 
 _includes_:

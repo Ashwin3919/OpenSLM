@@ -237,8 +237,8 @@ Defined in `configs/bitnet_config/training/default.yaml`.
 | `checkpoint_path` | `outputs/bitnet/checkpoints/` | Checkpoint directory. |
 | `optimizer.learning_rate` | `3e-4` | Peak learning rate. |
 | `optimizer.betas` | `[0.9, 0.95]` | AdamW momentum coefficients. |
-| `optimizer.weight_decay` | `0.0` | L2 regularisation (disabled — ternary weights are already implicitly regularised by quantization). |
-| `scheduler.warmup_steps` | `2000` | Linear LR warmup steps (2× the baseline to improve STE gradient flow at start of training). |
+| `optimizer.weight_decay` | `0.0` | L2 regularisation disabled. L2 decay pushes full-precision latent weights toward zero; the ternary quantizer rounds near-zero weights to 0, making them permanently inactive (zero gradient in both forward and backward). Applying weight decay creates an irreversible dead-neuron problem that accumulates throughout training. The ternary projection itself acts as implicit regularisation — explicit L2 is not only unnecessary but harmful. |
+| `scheduler.warmup_steps` | `2000` | 2× the baseline 1000-step warmup. In early training, latent weights are initialised near zero and have not yet moved into a regime where their ternary projections form meaningful representations. During this phase, STE gradients are noisy (the quantized weight is near-arbitrary relative to the gradient direction). A longer warmup gives the latent weights time to reach meaningful magnitudes before the ternary rounding becomes the dominant constraint. Using 1000 steps results in noisier early training and a measurably worse final validation loss. |
 | `scheduler.min_lr` | `3e-5` | Minimum LR after cosine decay. |
 
 ---

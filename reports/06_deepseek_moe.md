@@ -145,10 +145,14 @@ Total:
   19.3 M + 2×1.57 M + 4×3.05 M ≈ 34.6 M total
 
 Active per token (dense + shared + top-2 of 8):
-  Dense layers:    full FFN active
-  MoE layers:     shared + 2 routed experts
-  ≈ 28 M active parameters per token forward pass
+  Always active (embed + all attn + dense FFN + shared experts + routers):
+    19.3 M + 6×0.39 M + 2×1.18 M + 4×0.295 M ≈ 25.2 M
+  Conditionally active (top-2 of 8 routed experts × 4 MoE layers):
+    4 × 2 × 0.295 M ≈ 2.36 M
+  Total active per forward pass ≈ 27.6 M
 ```
+
+Notebook-verified total: **34,651,392 parameters** (~34.7 M).
 
 ---
 
@@ -156,7 +160,7 @@ Active per token (dense + shared + top-2 of 8):
 
 Two ready-to-use model configs are in `configs/deepseek_moe_config/model/`.
 
-### `deepseek_moe_small.yaml` — ~35 M total, ~28 M active
+### `deepseek_moe_small.yaml` — ~34.7 M total, ~27.6 M active
 
 ```yaml
 model_type: deepseek_moe

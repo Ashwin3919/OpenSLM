@@ -299,8 +299,8 @@ Defined in `configs/rwkv_config/training/default.yaml`.
 | `eval_batches` | `500` | Validation batches per evaluation. |
 | `checkpoint_path` | `outputs/rwkv/checkpoints/` | Checkpoint directory. |
 | `optimizer.learning_rate` | `3e-4` | Peak learning rate. |
-| `optimizer.betas` | `[0.9, 0.99]` | AdamW momentum coefficients. |
-| `optimizer.weight_decay` | `0.01` | L2 regularisation. |
+| `optimizer.betas` | `[0.9, 0.99]` | AdamW momentum coefficients. β₂ = 0.99 (vs 0.95 for other models) — the WKV `time_decay` and `time_first` scalars control the temporal recurrence and require smoother gradient estimates. β₂ = 0.95 produces noisy updates to these parameters, destabilising the recurrence. 0.99 is the value used in all official RWKV checkpoints (Peng et al. 2023). |
+| `optimizer.weight_decay` | `0.01` | L2 regularisation. Lower than the 0.1 baseline because RWKV has `time_decay` and `time_mix` vectors (not matrices) that encode per-channel temporal blending. Strong L2 decay (0.1) shrinks these scalars toward zero, collapsing the time-mixing to a fixed uniform blend and preventing the model from learning different temporal dynamics per channel. 0.01 regularises without destroying the recurrence structure. |
 | `scheduler.warmup_steps` | `1000` | Linear LR warmup steps. |
 | `scheduler.min_lr` | `3e-5` | Minimum LR after cosine decay. |
 

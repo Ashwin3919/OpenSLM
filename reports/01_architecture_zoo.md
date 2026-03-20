@@ -36,11 +36,18 @@ This document is the central reference for a controlled experiment benchmarking 
 | Evaluation interval | Every 500 iterations |
 | Random seed | 42 |
 
-**Exceptions to shared protocol:**
-- **MiniGPT**: lr = 1e-4, min_lr = 5e-4, max_grad_norm = 0.5, eps = 1e-9 (original nanoGPT notebook settings preserved).
-- **RWKV**: β = (0.9, 0.99), wd = 0.01 (RWKV-specific optimizer tuning).
-- **BitNet**: wd = 0.0, warmup_steps = 2000 (adjusted for ternary weight training dynamics).
-- **DeepSeek MoE**: batch_size = 16, gradient_accumulation_steps = 64 (same effective batch of 1 024; micro-batch halved to reduce memory from expert activations).
+**Architecturally-motivated exceptions (3 models require deviations from the baseline):**
+
+- **BitNet** — `weight_decay = 0.0`, `warmup_steps = 2000`
+  - *weight_decay = 0.0*: L2 weight decay pushes full-precision latent weights toward zero. In BitNet, weights near zero get rounded to 0 by the ternary quantizer (STE) and become permanently inactive — they produce no gradient and cannot recover. Applying 0.1 weight decay would progressively kill neurons throughout training. Weight decay and ternary quantization are incompatible.
+  - *warmup_steps = 2000*: During the forward pass, latent weights are snapped to {-1, 0, +1} via the Straight-Through Estimator. In the first few hundred steps, latent weights have not yet converged to meaningful magnitudes, so the ternary projection is essentially random. A 2× longer warmup (2000 vs 1000 steps) gives the latent weights time to organise before ternary rounding becomes the dominant effect. Using 1000 steps produces noisier early training and a measurably worse final loss.
+
+- **RWKV** — `β = (0.9, 0.99)`, `weight_decay = 0.01`
+  - *β₂ = 0.99*: The WKV recurrence computes a running exponential average of keys and values controlled by a learned per-head time-decay scalar `w`. With β₂ = 0.95, the optimizer's second-moment estimate is too reactive — it produces noisy updates to the `time_decay` and `time_first` parameters, destabilising the recurrence. β₂ = 0.99 gives a smoother gradient signal for the temporal components. This is the value used in all official RWKV checkpoints and is explicitly recommended in RWKV training guidelines (Peng et al. 2023).
+  - *weight_decay = 0.01*: RWKV has `time_decay` and `time_mix` scalars (vectors, not matrices) that control how much each channel blends the current token with the prior state. Strong L2 weight decay (0.1) shrinks these toward zero, collapsing the time-mixing toward a uniform fixed blend regardless of input. The model loses the ability to learn different temporal dynamics per channel. 0.01 provides light regularisation without destroying the recurrence structure.
+
+- **DeepSeek MoE** — `batch_size = 16`, `gradient_accumulation_steps = 64`
+  - Pure memory constraint, not a training dynamics choice. During a forward pass, the MoE layer instantiates all 8 expert modules before the routing mask discards 6 of them — peak activation memory scales with the number of experts, not just top-k. At batch_size = 32, this doubles the activation memory footprint relative to a dense model of the same active parameter count. Halving the micro-batch and doubling gradient accumulation steps preserves an identical effective batch size of 1024 tokens. The model sees the same training signal; only the gradient accumulation granularity changes.
 
 ---
 
