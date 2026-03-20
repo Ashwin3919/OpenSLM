@@ -45,13 +45,14 @@ python main.py generate --config configs/miniGPT_config/experiments/exp_001_base
 
 ## Architecture Zoo
 
-8 SLM architectures implemented at the same ~30–35 M parameter scale, trained on TinyStories with identical tokenizer and training budget. See [`reports/01_architecture_zoo.md`](reports/01_architecture_zoo.md) for the full comparison and [`reports/10_compare.md`](reports/10_compare.md) for results.
+9 SLM architectures implemented at the ~29–53 M parameter scale, trained on TinyStories with identical tokenizer and training budget. See [`reports/01_architecture_zoo.md`](reports/01_architecture_zoo.md) for the full comparison and [`reports/10_compare.md`](reports/10_compare.md) for results.
 
 | Registry Key | Params (total) | Active | Key Innovation | Report |
 |---|---|---|---|---|
 | `gpt` | 30.0 M | 30.0 M | Vanilla transformer baseline | [02_gpt.md](reports/02_gpt.md) |
 | `llama` | 28.7 M | 28.7 M | RMSNorm + RoPE + GQA + SwiGLU | [03_llama.md](reports/03_llama.md) |
-| `deepseek_moe` | 34.7 M | ~28 M | Shared + routed MoE experts | [06_deepseek_moe.md](reports/06_deepseek_moe.md) |
+| `gemma3` | 28.7 M | 28.7 M | Local/global attention + QK norm + logit soft-cap + GeGLU | [11_gemma3.md](reports/11_gemma3.md) |
+| `deepseek_moe` | 34.7 M | ~27.6 M | Shared + routed MoE experts | [06_deepseek_moe.md](reports/06_deepseek_moe.md) |
 | `mamba` | 30.4 M | 30.4 M | Selective SSM, no attention | [08_mamba.md](reports/08_mamba.md) |
 | `rwkv` | 53.0 M | 53.0 M | WKV recurrence, O(1) inference | [09rwkv.md](reports/09rwkv.md) |
 | `jamba` | 34.8 M | 34.8 M | Hybrid Mamba + Attention | [07_jamba.md](reports/07_jamba.md) |
@@ -71,6 +72,7 @@ make train MODEL=deepseek_moe_config
 
 # Architecture Zoo convenience targets
 make train-llama
+make train-gemma3
 make train-mamba
 make train-rwkv
 make train-jamba
@@ -93,6 +95,7 @@ src/
   models/                    ← SLM plugins and non-model config dataclasses
     gpt/                     ← GPT-2 baseline
     llama/                   ← LLaMA-style (RoPE + RMSNorm + GQA + SwiGLU)
+    gemma3/                  ← Gemma 3 (local/global attn + QK norm + logit soft-cap + GeGLU)
     deepseek_moe/            ← DeepSeek MoE (shared + routed experts)
     mamba/                   ← Mamba SSM (no attention, O(n))
     rwkv/                    ← RWKV (linear attention RNN)
@@ -119,6 +122,7 @@ src/
 configs/
   miniGPT_config/            ← GPT-2 baseline configs
   llama_config/              ← LLaMA configs
+  gemma3_config/             ← Gemma 3 configs
   deepseek_moe_config/       ← DeepSeek MoE configs
   mamba_config/              ← Mamba configs
   rwkv_config/               ← RWKV configs
@@ -203,7 +207,8 @@ make lint          # ruff
 | `reports/07_jamba.md` | Jamba: hybrid Mamba + Attention |
 | `reports/08_mamba.md` | Mamba SSM: selective scan, no attention |
 | `reports/09rwkv.md` | RWKV: WKV recurrence, token shift, parallel scan |
-| `reports/10_compare.md` | Controlled comparison results: all 8 architectures at 30M params |
+| `reports/10_compare.md` | Controlled comparison results: all 8 trained architectures at 30M params |
+| `reports/11_gemma3.md` | Gemma 3: local/global attention, QK norm, logit soft-capping, GeGLU |
 
 ---
 

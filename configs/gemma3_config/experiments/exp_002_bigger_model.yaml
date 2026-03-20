@@ -1,0 +1,16 @@
+# Experiment 002 — Gemma 3 medium, longer run
+# Scales to ~60M parameters and 50k iterations.
+# Run: make train MODEL=gemma3_config EXP=exp_002_bigger_model
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/gemma3_medium.yaml"
+  - "../training/default.yaml"
+
+# Override only what changes.
+training:
+  max_iters: 50000
+  batch_size: 16
+  block_size: 256
+  checkpoint_path: "outputs/gemma3_medium/checkpoints/"

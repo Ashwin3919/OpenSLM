@@ -13,6 +13,7 @@
 #   jamba_config        Jamba Hybrid SLM (~35M)         reports/jamba.md
 #   bitnet_config       BitNet 1.58b SLM (~30M)         reports/bitnet.md
 #   retnet_config       RetNet SLM (~29M)               reports/retnet.md
+#   gemma3_config       Gemma 3 SLM (~29M)              reports/11_gemma3.md
 #
 # Comparison: reports/architecture_zoo.md
 
@@ -22,7 +23,7 @@ CFG    = configs/$(MODEL)/experiments/$(EXP).yaml
 
 .PHONY: prep train evaluate generate test test-core test-models lint format \
         clean clean-outputs clean-data \
-        train-llama train-deepseek-moe train-mamba train-rwkv \
+        train-llama train-gemma3 train-deepseek-moe train-mamba train-rwkv \
         train-jamba train-bitnet train-retnet help
 
 help:
@@ -40,6 +41,7 @@ help:
 	@echo ""
 	@echo "── Architecture Zoo (one-liners) ────────────────────────────"
 	@echo "  train-llama         Train LLaMA-style SLM (~31M)"
+	@echo "  train-gemma3        Train Gemma 3-style SLM (~29M)"
 	@echo "  train-deepseek-moe  Train DeepSeek MoE SLM (~48M total)"
 	@echo "  train-mamba         Train Mamba SSM SLM (~32M)"
 	@echo "  train-rwkv          Train RWKV SLM (~33M)"
@@ -124,6 +126,9 @@ clean-data:
 
 train-llama:
 	$(MAKE) train MODEL=llama_config EXP=$(EXP)
+
+train-gemma3:
+	$(MAKE) train MODEL=gemma3_config EXP=$(EXP)
 
 train-deepseek-moe:
 	PYTORCH_ALLOC_CONF=expandable_segments:True $(MAKE) train MODEL=deepseek_moe_config EXP=$(EXP)

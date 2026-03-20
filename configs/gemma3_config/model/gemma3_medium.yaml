@@ -1,0 +1,19 @@
+# Gemma 3-style SLM — medium variant (~60 M parameters)
+# 12 layers (10 local + 2 global), 8 query heads, 2 KV heads, 512 dim
+# Layers 5 and 11 are global — maintains 5:1 local:global ratio
+model_type: gemma3
+model:
+  vocab_size: 50257
+  block_size: 256
+  n_layer: 12
+  n_head: 8
+  n_kv_head: 2
+  n_embd: 512
+  intermediate_size: 1536
+  sliding_window: 128
+  local_rope_theta: 10000.0
+  global_rope_theta: 1000000.0
+  attn_logit_cap: 50.0
+  final_logit_cap: 30.0
+  global_layers: [5, 11]
+  dropout: 0.0

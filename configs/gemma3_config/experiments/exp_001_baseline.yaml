@@ -1,0 +1,11 @@
+# Experiment 001 — Gemma 3 baseline
+# ~29M parameter model trained on the same budget as all other zoo models.
+# Run: make train MODEL=gemma3_config
+
+_includes_:
+  - "../base.yaml"
+  - "../data/tinystories.yaml"
+  - "../model/gemma3_small.yaml"
+  - "../training/default.yaml"
+
+# No overrides — all defaults from included files apply.

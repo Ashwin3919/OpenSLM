@@ -1,0 +1,7 @@
+data:
+  dataset_name: "roneneldan/TinyStories"
+  encoding: "gpt2"
+  vocab_size: 50257
+  output_dir: "data/"
+  train_file: "train.bin"
+  val_file: "validation.bin"

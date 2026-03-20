@@ -12,12 +12,13 @@ This document is the central reference for a controlled experiment benchmarking 
 |---|---|---|---|---|---|
 | 1 | `gpt` | 30.0 M | 30.0 M | Full MHA | Vanilla decoder |
 | 2 | `llama` | 28.7 M | 28.7 M | GQA + RoPE | RMSNorm + SwiGLU + GQA |
-| 3 | `deepseek_moe` | 34.7 M | ~28 M | GQA + RoPE | Shared + routed MoE experts |
+| 3 | `deepseek_moe` | 34.7 M | ~27.6 M | GQA + RoPE | Shared + routed MoE experts |
 | 4 | `mamba` | 30.4 M | 30.4 M | None | Selective SSMs |
 | 5 | `rwkv` | 53.0 M | 53.0 M | None | WKV recurrence |
 | 6 | `jamba` | 34.8 M | 34.8 M | Half layers | Hybrid SSM-attention |
 | 7 | `bitnet` | 28.8 M | 28.8 M | GQA + RoPE | Ternary {-1, 0, +1} weights |
 | 8 | `retnet` | 29.9 M | 29.9 M | Retention (no softmax) | Multi-scale exponential decay |
+| 9 | `gemma3` | 28.7 M | 28.7 M | Local GQA + Global GQA | Local/global attention + QK norm + logit soft-cap + GeGLU |
 
 ---
 
@@ -107,3 +108,4 @@ make generate MODEL=llama_config
 - [08_mamba.md](08_mamba.md) — Mamba (selective state spaces)
 - [09rwkv.md](09rwkv.md) — RWKV (WKV recurrence, O(1) inference)
 - [10_compare.md](10_compare.md) — Controlled comparison: results and analysis
+- [11_gemma3.md](11_gemma3.md) — Gemma 3 (local/global attention, QK norm, logit soft-capping, GeGLU)

@@ -1,0 +1,20 @@
+# Gemma 3-style SLM — ~29 M parameters
+# 6 layers (5 local + 1 global), 6 query heads, 2 KV heads, 384 dim
+# Local attention window: 64 tokens (half of block_size)
+# Layer 5 is the global (full causal) attention layer — 5:1 local:global ratio
+model_type: gemma3
+model:
+  vocab_size: 50257
+  block_size: 128
+  n_layer: 6
+  n_head: 6
+  n_kv_head: 2
+  n_embd: 384
+  intermediate_size: 1024
+  sliding_window: 64
+  local_rope_theta: 10000.0
+  global_rope_theta: 1000000.0
+  attn_logit_cap: 50.0
+  final_logit_cap: 30.0
+  global_layers: [5]
+  dropout: 0.0
